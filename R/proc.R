@@ -108,7 +108,7 @@ data <- issp %>%
 # c) Construcción de la variable clase social (clase) ---------------------
          clase = factor(case_when(propiedad == 'Capitalista' ~ 'Capitalista',
                            propiedad == 'Pequeño empleador' ~ 'Pequeño empleador',
-                           propiedad == 'Pequeña burguesía' ~ 'Pequeña burguesia',
+                           propiedad == 'Pequeña burguesia' ~ 'Pequeña burguesia',
                            propiedad == 'No propietario' & WRKSUP == 1 & NSUP > 100 & habilidades == 'Experto' ~ 'Experto directivo',
                            propiedad == 'No propietario' & WRKSUP == 1 & NSUP > 100 & habilidades == 'Calificado' ~ 'Directivo semi-credencializado',
                            propiedad == 'No propietario' & WRKSUP == 1 & NSUP > 100 & habilidades == 'No calificado' ~ 'Directivo no credencializado',
