@@ -109,27 +109,23 @@ data <- issp %>%
          clase = factor(case_when(propiedad == 'Capitalista' ~ 'Capitalista',
                            propiedad == 'Pequeño empleador' ~ 'Pequeño empleador',
                            propiedad == 'Pequeña burguesia' ~ 'Pequeña burguesia',
-                           propiedad == 'No propietario' & WRKSUP == 1 & NSUP > 100 & habilidades == 'Experto' ~ 'Experto directivo',
-                           propiedad == 'No propietario' & WRKSUP == 1 & NSUP > 100 & habilidades == 'Calificado' ~ 'Directivo semi-credencializado',
-                           propiedad == 'No propietario' & WRKSUP == 1 & NSUP > 100 & habilidades == 'No calificado' ~ 'Directivo no credencializado',
-                           propiedad == 'No propietario' & WRKSUP == 1 & NSUP <= 100 & habilidades == 'Experto' ~ 'Experto supervisor',
-                           propiedad == 'No propietario' & WRKSUP == 1 & NSUP <= 100 & habilidades == 'Calificado' ~ 'Supervisor semi-credencializado',
-                           propiedad == 'No propietario' & WRKSUP == 1 & NSUP <= 100 & habilidades == 'No calificado' ~ 'Supervisor no credencializado',
+                           propiedad == 'No propietario' & WRKSUP == 1 & habilidades == 'Experto' ~ 'Experto directivo/supervisor',
+                           propiedad == 'No propietario' & WRKSUP == 1 & habilidades == 'Calificado' ~ 'Directivo/supervisor semi-credencializado',
+                           propiedad == 'No propietario' & WRKSUP == 1 & habilidades == 'No calificado' ~ 'Directivo/supervisor no credencializado',
                            propiedad == 'No propietario' & WRKSUP == 2 & habilidades == 'Experto' ~ 'Experto no directivo',
                            propiedad == 'No propietario' & WRKSUP == 2 & habilidades == 'Calificado' ~ 'Obrero semi-credencializado',
-                           propiedad == 'No propietario' & WRKSUP == 2 & habilidades == 'No calificado' ~ 'Proletario'), 
+                           propiedad == 'No propietario' & WRKSUP == 2 & habilidades == 'No calificado' ~ 'Proletario',
+                           TRUE ~ NA_character_), 
                         levels = c('Proletario',
                                    'Obrero semi-credencializado', 
                                    'Experto no directivo',
-                                   'Supervisor no credencializado',
-                                   'Supervisor semi-credencializado', 
-                                   'Experto supervisor',
-                                   'Directivo no credencializado',
-                                   'Directivo semi-credencializado', 
-                                   'Experto directivo',
+                                   'Directivo/supervisor no credencializado',
+                                   'Directivo/supervisor semi-credencializado', 
+                                   'Experto directivo/supervisor',
                                    'Pequeña burguesia',
                                    'Pequeño empleador',
-                                   'Capitalista'))) 
+                                   'Capitalista'))) %>% 
+  select(-c(EMPREL, ISCO08, WRKSUP, NSUP, propiedad, habilidades))
 
 
   
