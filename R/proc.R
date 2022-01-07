@@ -22,6 +22,9 @@ find_var(issp, "Conflict")
 #v37 Q12b Conflicts: Between the working class and the middle class?
 #V38 Q12c Conflicts: Between management and workers?
 
+find_var(issp, "incomes")
+#v22 Q4b It is the responsibility of the government to reduce the differences in income between people with high and low incomes.
+
 find_var(issp, "EMP") #EMPREL Employment relationship
 find_var(issp, "ISCO") #ISCO08
 find_var(issp, "Supervise") #WRKSUP Supervise other employees
@@ -55,6 +58,7 @@ data <- issp %>%
   select(confl_rp = v36, #Rich and poor
          confl_wm = v37, #Working class and middle class
          confl_mw = v38, #Managers and workers
+         confl_pol = v22,
          EMPREL,
          ISCO08,
          WRKSUP,
@@ -72,7 +76,7 @@ data <- issp %>%
   mutate_if(is.labelled, as.numeric) %>% #Transformar en numeric 
   mutate_at(vars(WRKSUP, NSUP, EMPREL), ~(car::recode(.,
                                                       "c(-9, -4) = NA"))) %>% 
-  mutate_at(vars(starts_with("confl")), ~(car::recode(.,
+  mutate_at(vars(starts_with("confl"), -confl_pol), ~(car::recode(.,
                                                 recodes = c("1 = 'El conflicto es muy fuerte';
                                                             2 = 'El conflicto es fuerte';
                                                             3 = 'El conflicto no es muy fuerte';
@@ -90,6 +94,19 @@ data <- issp %>%
                              c("c(1, 2) = 'Si';
                                3 = 'No';
                                c(-9, -7, -4) = NA")),
+         confl_pol = car::recode(.$confl_pol,
+                                 c("c(-9, -8) = NA;
+                                   1 = 'Muy de acuerdo';
+                                   2 = 'De acuerdo';
+                                   3 = 'Ni de acuerdo ni en desacuerdo';
+                                   4 = 'En desacuerdo';
+                                   5 = 'Muy en desacuerdo'"),
+                                 as.factor = T,
+                                 levels = c('Muy en desacuerdo',
+                                            'En desacuerdo',
+                                            'Ni de acuerdo ni en desacuerdo',
+                                            'De acuerdo',
+                                            'Muy de acuerdo')),
          propiedad = car::recode(.$EMPREL,
                                  recodes = c("1 = 'No propietario';
                                              2 = 'Pequeña burguesia';
