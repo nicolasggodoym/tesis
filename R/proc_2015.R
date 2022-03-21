@@ -95,9 +95,10 @@ data <- issp %>%
   # b) Procesamiento
   
   mutate_if(is.labelled, as.numeric) %>% #Transformar en numeric 
-  mutate_at(vars(WRKSUP, NSUP, EMPREL, ISCO08), ~(car::recode(.,
+  mutate_at(vars(WRKSUP, NSUP, EMPREL, ISCO08, work_stress, satisf_job, proud_job), ~(car::recode(.,
                                                       "0 = NA"))) %>% 
-  mutate_at(vars(WRKSUP, EMPREL), ~(car::recode(.,
+  mutate_at(vars(WRKSUP, EMPREL, work_stress, satisf_job, proud_job, 
+                 starts_with("pi"), earn_job), ~(car::recode(.,
                                                 "c(8,9) = NA"))) %>% 
   mutate(SEX = car::recode(.$SEX,
                            recodes = c("1 = 'Hombre';
@@ -141,12 +142,8 @@ data <- issp %>%
                                    'Experto directivo/supervisor',
                                    'Pequeña burguesia',
                                    'Pequeño empleador',
-                                   'Capitalista'))) #%>% 
+                                   'Capitalista'))) %>%
   select(-c(EMPREL, ISCO08, WRKSUP, NSUP, propiedad, habilidades))
-
-
-
-
 
 # 5. Etiquetado -----------------------------------------------------------
 
