@@ -22,8 +22,12 @@ find_var(issp, "Conflict")
 #v37 Q12b Conflicts: Between the working class and the middle class?
 #V38 Q12c Conflicts: Between management and workers?
 
-find_var(issp, "incomes")
-#v22 Q4b It is the responsibility of the government to reduce the differences in income between people with high and low incomes.
+find_var(issp, "Q4a") #v21 Q4a Differences in income in [COUNTRY] are too large.
+find_var(issp, "Q4b") #v22 Q4b It is the responsibility of the government to reduce the differences in income between people with high and low incomes.
+find_var(issp, "Q4d") #v24 Q4d It is the responsibility of private companies to reduce the differences in pay between their employees with high and low pay.
+find_var(issp, "Q8a") #v28 Q8a Tax: Do you think people with high incomes should pay a larger share of their income in taxes than those with low incomes?
+find_var(issp, "Q10") #v32 Q10 Do you feel angry about differences in wealth between the rich and the poor?
+
 
 find_var(issp, "EMP") #EMPREL Employment relationship
 find_var(issp, "ISCO") #ISCO08
@@ -58,7 +62,11 @@ data <- issp %>%
   select(confl_rp = v36, #Rich and poor
          confl_wm = v37, #Working class and middle class
          confl_mw = v38, #Managers and workers
-         confl_pol = v22,
+         diff_inc = v21,
+         resp_gov = v22,
+         resp_priv = v24,
+         prog_tax = v28,
+         angry_diff = v32,
          EMPREL,
          ISCO08,
          WRKSUP,
@@ -76,7 +84,7 @@ data <- issp %>%
   mutate_if(is.labelled, as.numeric) %>% #Transformar en numeric 
   mutate_at(vars(WRKSUP, NSUP, EMPREL), ~(car::recode(.,
                                                       "c(-9, -4) = NA"))) %>% 
-  mutate_at(vars(starts_with("confl"), -confl_pol), ~(car::recode(.,
+  mutate_at(vars(starts_with("confl")), ~(car::recode(.,
                                                 recodes = c("1 = 'El conflicto es muy fuerte';
                                                             2 = 'El conflicto es fuerte';
                                                             3 = 'El conflicto no es muy fuerte';
@@ -86,7 +94,23 @@ data <- issp %>%
                                                            'El conflicto no es muy fuerte',
                                                            'El conflicto es fuerte',
                                                            'El conflicto es muy fuerte')))) %>% 
-  mutate(SEX = car::recode(.$SEX,
+  mutate(iso3c = car::recode(.$iso3c,
+                             recodes = c("'CH' = 'CHE';
+                                         'CL' = 'CHL';
+                                         'CZ' = 'CSK';
+                                         'DE' = 'DEU';
+                                         'DK' = 'DNK';
+                                         'FI' = 'FIN';
+                                         'HR' = 'HRV';
+                                         'IT' = 'ITA';
+                                         'JP' = 'JPN';
+                                         'NZ' = 'NZL';
+                                         'PH' = 'PHL';
+                                         'RU' = 'RUS';
+                                         'SI' = 'SVN';
+                                         'TH' = 'THA';
+                                         'ZA' = 'ZAF'")),
+         SEX = car::recode(.$SEX,
                            recodes = c("1 = 'Hombre';
                                        2 = 'Mujer';
                                        -9 = NA")),
@@ -94,7 +118,7 @@ data <- issp %>%
                              c("c(1, 2) = 'Si';
                                3 = 'No';
                                c(-9, -7, -4) = NA")),
-         confl_pol = car::recode(.$confl_pol,
+         resp_gov = car::recode(.$resp_gov,
                                  c("c(-9, -8) = NA;
                                    1 = 'Muy de acuerdo';
                                    2 = 'De acuerdo';
@@ -145,8 +169,16 @@ data <- issp %>%
   select(-c(EMPREL, ISCO08, WRKSUP, NSUP, propiedad, habilidades))
 
 
+# Incorporar variables contextuales ---------------------------------------
   
-  
+load(url("https://github.com/fabrica-datos-laborales/fdl-data/raw/main/output/data/fdl.RData"))  
+context <- fdl %>% filter(year == 2019) %>% select(iso3c, 'nstrikes_isic31_total_ilo-stat', 'cbc_ilo-stat')
+rm(list_fdl)
+
+# merge() -----------------------------------------------------------------
+
+m <- merge(data, context,
+           by = "iso3c", all.x = T)
 
 # 5. Etiquetado -----------------------------------------------------------
 

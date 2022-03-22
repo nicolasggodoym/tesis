@@ -131,6 +131,17 @@ data <- issp %>%
                                    'Capitalista'))) %>%
   select(-c(EMPREL, ISCO08, WRKSUP, NSUP, propiedad, habilidades))
 
+# Incorporar variables contextuales ---------------------------------------
+
+load(url("https://github.com/fabrica-datos-laborales/fdl-data/raw/main/output/data/fdl.RData"))  
+context <- fdl %>% filter(year == 2019) %>% select(iso3c, 'nstrikes_isic31_total_ilo-stat', 'cbc_ilo-stat')
+rm(list_fdl)
+
+# merge() -----------------------------------------------------------------
+
+m <- merge(data, context,
+           by = "iso3c", all.x = T)
+
 # 5. Etiquetado -----------------------------------------------------------
 
 
