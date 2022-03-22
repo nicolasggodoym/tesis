@@ -98,8 +98,13 @@ data <- issp %>%
   mutate_at(vars(WRKSUP, NSUP, EMPREL, ISCO08, work_stress, satisf_job, proud_job), ~(car::recode(.,
                                                       "0 = NA"))) %>% 
   mutate_at(vars(WRKSUP, EMPREL, work_stress, satisf_job, proud_job, 
-                 starts_with("pi"), earn_job), ~(car::recode(.,
+                 starts_with("pi"), earn_job, SEX), ~(car::recode(.,
                                                 "c(8,9) = NA"))) %>% 
+  mutate_at(vars(earn_job, starts_with("pi"), work_stress), ~(car::recode(.,
+                                          c("1 = 5;
+                                            2 = 4;
+                                            4 = 2;
+                                            5 = 1")))) %>% 
   mutate(SEX = car::recode(.$SEX,
                            recodes = c("1 = 'Hombre';
                                        2 = 'Mujer';
@@ -143,7 +148,11 @@ data <- issp %>%
                                    'Pequeña burguesia',
                                    'Pequeño empleador',
                                    'Capitalista'))) %>%
+  rowwise() %>% 
+  mutate(index = sum(pi_inter, pi_help, pi_useful, na.rm = T)) %>% 
+  ungroup() %>% 
   select(-c(EMPREL, ISCO08, WRKSUP, NSUP, propiedad, habilidades))
+
 
 # Incorporar variables contextuales ---------------------------------------
 
