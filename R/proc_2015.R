@@ -1,7 +1,7 @@
 
 # Código de procesamiento ISSP 2015 -------------------------------------------------
 
-
+rm(list = ls())
 # 1. Cargar librerías  ----------------------------------------------------
 
 pacman::p_load(tidyverse,
@@ -107,7 +107,7 @@ data <- issp %>%
          UNION = car::recode(.$UNION,
                              c("c(1, 2) = 'Si';
                                3 = 'No';
-                               c(-9, -7, -4) = NA")),
+                               c(0, 7, 9) = NA")),
         propiedad = car::recode(.$EMPREL,
                                  recodes = c("1 = 'No propietario';
                                              2 = 'Pequeña burguesia';

@@ -1,7 +1,7 @@
 
 # Código de procesamiento ISSP 2019 -------------------------------------------------
 
-
+rm(list = ls())
 # 1. Cargar librerías  ----------------------------------------------------
 
 pacman::p_load(tidyverse,
