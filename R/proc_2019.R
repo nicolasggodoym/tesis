@@ -8,7 +8,7 @@ pacman::p_load(tidyverse,
               sjmisc,
               haven,
               dplyr,
-              car)
+              car, lme4)
 
 # 2. Cargar datos ---------------------------------------------------------
 
@@ -172,13 +172,16 @@ data <- issp %>%
 # Incorporar variables contextuales ---------------------------------------
   
 load(url("https://github.com/fabrica-datos-laborales/fdl-data/raw/main/output/data/fdl.RData"))  
-context <- fdl %>% filter(year == 2019) %>% select(iso3c, 'nstrikes_isic31_total_ilo-stat', 'cbc_ilo-stat')
+context <- fdl %>% filter(year == 2019) %>% select(iso3c, huelgas = 'nstrikes_isic4_total_ilo-stat', cobertura = 'WCB_ictwss')
 rm(list_fdl)
 
 # merge() -----------------------------------------------------------------
 
 m <- merge(data, context,
            by = "iso3c", all.x = T)
+
+
+z <- lme4::lmer(angry_diff ~ clase + (clase | huelgas), m, exp)
 
 # 5. Etiquetado -----------------------------------------------------------
 
