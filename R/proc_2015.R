@@ -8,7 +8,10 @@ pacman::p_load(tidyverse,
                sjmisc,
                haven,
                dplyr,
-               car)
+               car, remotes)
+
+#Para alfa ordinal
+remotes::install_github("jogrue/jogRu", force = T)
 
 # 2. Cargar datos ---------------------------------------------------------
 
@@ -154,6 +157,9 @@ data <- issp %>%
   select(-c(EMPREL, ISCO08, WRKSUP, NSUP, propiedad, habilidades))
 
 
+#Estimación alfa ordinal para el índice (0.78)
+jogRu::ordinal_alpha(data %>% select(pi_inter, pi_help, pi_useful))
+
 # Incorporar variables contextuales ---------------------------------------
 
 load(url("https://github.com/fabrica-datos-laborales/fdl-data/raw/main/output/data/fdl.RData"))  
@@ -164,6 +170,8 @@ rm(list_fdl)
 
 m <- merge(data, context,
            by = "iso3c", all.x = T)
+
+jogRu::ordinal_alpha(data %>% select(pi_inter, pi_help, pi_useful))
 
 # 5. Etiquetado -----------------------------------------------------------
 
