@@ -11,7 +11,7 @@ pacman::p_load(tidyverse,
                car, remotes)
 
 #Para alfa ordinal
-remotes::install_github("jogrue/jogRu", force = T)
+#remotes::install_github("jogrue/jogRu", force = T)
 
 # 2. Cargar datos ---------------------------------------------------------
 
@@ -19,23 +19,35 @@ issp <- read_dta("input/data/issp_2015.dta")
 
 # 3. Explorar -------------------------------------------------------------
 
-# Variables independientes de interés
+# Variables de interés
 
+# Have index
+find_var(issp, "Q12a") #v22 Q12a Apply to R's job: my job is secure
+find_var(issp, "Q12b") #v23 Q12b Apply to R's job: my income is high
+find_var(issp, "Q12c") #v24 Q12c Apply to R's job: opportunities for advancement are high
+find_var(issp, "Q12d") #v25 Q12d Apply to R's job: my job is interesting
+find_var(issp, "Q12e") #v26 Q12e Apply to R's job: can work independently
+find_var(issp, "Q12f") #v27 Q12f Apply to R's job: can help other people
+find_var(issp, "Q12g") #v28 Q12g Apply to R's job: job is useful to society
 
-# Realización en el trabajo
-find_var(issp, "Q2c") #v5 Q2c Personally important: opportunities for advancement
-find_var(issp, "Q2d") #v6 Q2d Personally important: an interesting job
-find_var(issp, "Q2f") #v8 Q2f Personally important: help other people
-find_var(issp, "Q2g") #v9 Q2g Personally important: a job useful to society
-find_var(issp, "Q4") #v13 Q4 Remain in not satisfying job for benefit of family life
-find_var(issp, "Q13b") #v31 Q13b How often applies: find work stressful
-find_var(issp, "Q23") #v44 Q23 How satisfied are you in your (main) job
-find_var(issp, "Q25b") #v49 Q25b I am proud of the type of work I do
-
-# Fetichización del trabajo
-find_var(issp, "Q1a") #v1 Q1a Job is a way of earning money - no more
+# Lack index
+find_var(issp, "Q2a") #v3 Q2a Personally important: job security
 find_var(issp, "Q2b") #v4 Q2b Personally important: high income
 find_var(issp, "Q2c") #v5 Q2c Personally important: opportunities for advancement
+find_var(issp, "Q2d") #v6 Q2d Personally important: an interesting job
+find_var(issp, "Q2e") #v7 Q2e Personally important: work independently
+find_var(issp, "Q2f") #v8 Q2f Personally important: help other people
+find_var(issp, "Q2g") #v9 Q2g Personally important: a job useful to society
+
+# Valoración no-mercantil del trabajo remunerado
+find_var(issp, "Q1a") #v1 Q1a Job is a way of earning money - no more
+find_var(issp, "Q1b") #v2 Q1b Enjoy a paid job even if I did not need money
+
+# Índice de sobreexigencia laboral
+find_var(issp, "Q13a") #v30 Q13a How often applies: Do hard physical work
+find_var(issp, "Q13b") #v31 Q13b How often applies: find work stressful
+find_var(issp, "Q14a") #v32 Q14a And how often applies: work at home during working hours
+find_var(issp, "Q14b") #v33 Q14b And how often applies: involve working on weekends
 
 # Variables predictoras (clase social y control)
 find_var(issp, "EMP") #EMPREL Employment relationship
@@ -66,49 +78,66 @@ frq(issp$WRKSUP)
 frq(issp$NSUP)
 frq(issp$SEX)
 
-
-
 # 4. Seleccionar y procesar variables -------------------------------------
 
+## Nivel micro -------------------------------------------------------------
 
-# a) Selección y filtrar ------------------------------------------------------------
+### a) Selección y filtrar ------------------------------------------------------------
 
 data <- issp %>% 
-  select(pi_opp_adv = v5,
-         pi_inter = v6, 
-         pi_help = v8,
+  select(id = CASEID,
+         iso3c = c_alphan,
+         year = DATEYR,
+         exp = WEIGHT,
+         SEX,
+         AGE,
+         job_money = v1,
+         job_enjoy = v2,
+         pi_security = v3, 
+         pi_income = v4, 
+         pi_advance = v5, 
+         pi_interest = v6, 
+         pi_indep = v7, 
+         pi_helpful = v8, 
          pi_useful = v9,
-         work_stress = v31,
-         satisf_job = v44,
-         proud_job = v49,
-         earn_job = v1,
-         pi_high_inc = v4,
+         have_security = v22,
+         have_income = v23,
+         have_advance = v24,
+         have_interest = v25,
+         have_indep = v26,
+         have_helpful = v27,
+         have_useful = v28,
+         often_phys = v30,
+         often_stress = v31,
+         often_home = v32,
+         often_weekend = v33,
          EMPREL,
          ISCO08,
          WRKSUP,
          NSUP,
-         SEX,
-         UNION,
-         iso3c = c_alphan,
-         id = CASEID,
-         year = DATEYR,
-         exp = WEIGHT) %>%
-  filter(ISCO08!=110,ISCO08!=210, ISCO08!=310) %>% #Eliminar FFAA
+         UNION) %>%
+  filter(ISCO08!=110, ISCO08!=210, ISCO08!=310) %>% #Eliminar FFAA
   
-  # b) Procesamiento
-  
+### b) Procesamiento -------------------------------------------------------------------------
+
   mutate_if(is.labelled, as.numeric) %>% #Transformar en numeric 
-  mutate_at(vars(WRKSUP, NSUP, EMPREL, ISCO08, work_stress, satisf_job, proud_job), ~(car::recode(.,
+  mutate_at(vars(WRKSUP, NSUP, EMPREL, ISCO08, starts_with("often")), ~(car::recode(.,
                                                       "0 = NA"))) %>% 
-  mutate_at(vars(WRKSUP, EMPREL, work_stress, satisf_job, proud_job, 
-                 starts_with("pi"), earn_job, SEX), ~(car::recode(.,
+  mutate_at(vars(WRKSUP, EMPREL, starts_with("pi"), starts_with("have"), starts_with("job"), starts_with("often"), SEX), ~(car::recode(.,
                                                 "c(8,9) = NA"))) %>% 
-  mutate_at(vars(earn_job, starts_with("pi"), work_stress), ~(car::recode(.,
-                                          c("1 = 5;
-                                            2 = 4;
-                                            4 = 2;
-                                            5 = 1")))) %>% 
-  mutate(SEX = car::recode(.$SEX,
+  mutate_at(vars(starts_with("pi"), starts_with("have"), starts_with("often"), job_enjoy), ~(car::recode(.,
+                                          c("1 = 4;
+                                            2 = 3;
+                                            3 = 2;
+                                            4 = 1;
+                                            5 = 0")))) %>% 
+  mutate(job_money = car::recode(.$job_money, 
+                                 recodes = c("1 = 0;
+                                             2 = 1;
+                                             3 = 2;
+                                             4 = 3;
+                                             5 = 4")),
+         SEX = car::recode(.$SEX,
                            recodes = c("1 = 'Hombre';
                                        2 = 'Mujer';
                                        -9 = NA")),
@@ -131,7 +160,7 @@ data <- issp %>%
                                    89, 90, 91, 92, 93, 94, 95, 96)= 'No calificado';
                                    99=NA"),
          
-         # c) Construcción de la variable clase social (clase) ---------------------
+### c) Construcción de la variable clase social (clase) ---------------------
          clase = factor(case_when(propiedad == 'Capitalista' ~ 'Capitalista',
                                   propiedad == 'Pequeño empleador' ~ 'Pequeño empleador',
                                   propiedad == 'Pequeña burguesia' ~ 'Pequeña burguesia',
@@ -151,27 +180,81 @@ data <- issp %>%
                                    'Pequeña burguesia',
                                    'Pequeño empleador',
                                    'Capitalista'))) %>%
-  rowwise() %>% 
-  mutate(index = sum(pi_inter, pi_help, pi_useful, na.rm = T)) %>% 
-  ungroup() %>% 
-  select(-c(EMPREL, ISCO08, WRKSUP, NSUP, propiedad, habilidades))
+ rowwise() %>%
+ mutate(commitment_suma = sum(job_money, job_enjoy, na.rm = T),
+       have_suma = sum(have_security, have_income, have_advance, have_interest, have_indep, have_helpful, have_useful, na.rm = T),
+       lack_security = have_security - pi_security,
+       lack_income = have_income - pi_income,
+       lack_advance = have_advance - pi_advance,
+       lack_interest = have_interest - pi_interest,
+       lack_indep = have_indep - pi_indep,
+       lack_helpful = have_helpful - pi_helpful,
+       lack_useful = have_useful - pi_useful,
+       lack_suma = sum(lack_security, lack_income, lack_advance, lack_interest, lack_indep, lack_helpful, lack_useful, na.rm = T),
+       exigencia_suma = sum(often_phys, often_stress, often_home, often_weekend, na.rm = T)) %>%
+ mutate(commitment_index = (commitment_suma/max(.$commitment_suma) * 100),
+       have_index = (have_suma/max(.$have_suma) * 100),
+       lack_index = (lack_suma/max(.$lack_suma) * 100),
+       exigencia_index = (exigencia_suma/max(.$exigencia_suma) * 100)) %>%
+ ungroup() %>%
+ mutate_at(vars(ends_with("index")), ~(car::recode(., "0 = NA"))) %>% 
+ select(-c(EMPREL, ISCO08, WRKSUP, NSUP, propiedad, habilidades, starts_with("pi"), 
+           starts_with("job"), starts_with("have"), -have_index, starts_with("often"), ends_with("suma"),
+           starts_with("lack"), -lack_index))
 
+# Variables indices
+## Employment commitment
+### job_money
+### job_enjoy
 
-#Estimación alfa ordinal para el índice (0.78)
-jogRu::ordinal_alpha(data %>% select(pi_inter, pi_help, pi_useful))
+## Have index
 
-# Incorporar variables contextuales ---------------------------------------
+### have_security
+### have_income
+### have_advance
+### have_interest
+### have_indep
+### have_helpful
+### have_useful
+
+## Lack index
+
+### pi_security
+### pi_income
+### pi_advance
+### pi_interest
+### pi_indep
+### pi_helpful
+### have_useful
+
+## Sobreexigencia
+
+### often_phys
+### often_stress
+### often_home
+### often_weekend
+
+## Macro nivel ---------------------------------------
+
+### Cargar datos ------------------------------------------------------------
 
 load(url("https://github.com/fabrica-datos-laborales/fdl-data/raw/main/output/data/fdl.RData"))  
+
+### Seleccionar y filtrar ---------------------------------------------------
+
 context <- fdl %>% filter(year == 2019) %>% select(iso3c, 'nstrikes_isic31_total_ilo-stat', 'cbc_ilo-stat')
 rm(list_fdl)
 
-# merge() -----------------------------------------------------------------
+
+### Recodificar y transformar -----------------------------------------------
+
+
+
+# Unificar con merge() -----------------------------------------------------------------
 
 m <- merge(data, context,
            by = "iso3c", all.x = T)
 
-jogRu::ordinal_alpha(data %>% select(pi_inter, pi_help, pi_useful))
 
 # 5. Etiquetado -----------------------------------------------------------
 
