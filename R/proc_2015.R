@@ -8,10 +8,11 @@ pacman::p_load(tidyverse,
                sjmisc,
                haven,
                dplyr,
-               car, remotes)
+               car, 
+               remotes)
 
 #Para alfa ordinal
-#remotes::install_github("jogrue/jogRu", force = T)
+remotes::install_github("jogrue/jogRu", force = T)
 
 # 2. Cargar datos ---------------------------------------------------------
 
@@ -85,6 +86,7 @@ frq(issp$SEX)
 ### a) Selección y filtrar ------------------------------------------------------------
 
 data <- issp %>% 
+  filter((ISCO08!=110 | ISCO08!=210 | ISCO08!=310) & v20 == 1) %>% #Eliminar FFAA
   select(id = CASEID,
          iso3c = c_alphan,
          year = DATEYR,
@@ -116,7 +118,6 @@ data <- issp %>%
          WRKSUP,
          NSUP,
          UNION) %>%
-  filter(ISCO08!=110, ISCO08!=210, ISCO08!=310) %>% #Eliminar FFAA
   
 ### b) Procesamiento -------------------------------------------------------------------------
 
@@ -233,6 +234,13 @@ data <- issp %>%
 ### often_stress
 ### often_home
 ### often_weekend
+
+jogRu::ordinal_alpha(data %>% select(starts_with("pi_")))
+
+jogRu::ordinal_alpha(data %>% select(16:22))
+
+jogRu::ordinal_alpha(data %>% select(starts_with("often_")))
+
 
 ## Macro nivel ---------------------------------------
 
