@@ -200,8 +200,14 @@ data <- issp %>%
  ungroup() %>%
  mutate_at(vars(ends_with("index")), ~(car::recode(., "0 = NA"))) %>% 
  select(-c(EMPREL, ISCO08, WRKSUP, NSUP, propiedad, habilidades, starts_with("pi"), 
-           starts_with("job"), starts_with("have"), -have_index, starts_with("often"), ends_with("suma"),
-           starts_with("lack"), -lack_index))
+           starts_with("job"), have_security, have_income, have_advance,
+           have_interest, have_indep, have_helpful, have_useful, 
+           starts_with("often"), ends_with("suma"),
+           lack_security, lack_income, lack_advance, lack_interest, lack_indep,
+           lack_helpful, lack_useful))
+ 
+
+
 
 # Variables indices
 ## Employment commitment
