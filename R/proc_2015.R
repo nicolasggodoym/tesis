@@ -297,9 +297,18 @@ m <- merge(data, context,
 
 # 6. Exportar datos -------------------------------------------------------
 
+
+data <- data %>% 
+  mutate_at(vars(strategic_suma, pm_suma, expr_suma), ~(car::recode(., c("c(0,1,2) = 0;
+                                                          c(3,4,5) = 1;
+                                                          c(6,7,8) = 2"))))
+data$strategic_suma <- car::recode(data$strategic_suma, c("c(0,1,2) = 0;
+                                                          c(3,4,5) = 1;
+                                                          c(6,7,8) = 2"))
+
 library(MASS)
-y <- polr(as_factor(strategic_suma) ~ clase + SEX + AGE + have_index, data)
-x <- polr(as_factor(pm_suma) ~ clase + SEX + AGE + have_index, data)
+x <- polr(as_factor(strategic_suma) ~ clase + SEX + AGE + have_index, data)
+y <- polr(as_factor(pm_suma) ~ clase + SEX + AGE + have_index, data)
 z <- polr(as_factor(expr_suma) ~ clase + SEX + AGE + have_index, data)
 
 a <- lm(strategic_suma ~ clase + SEX + AGE + have_index, data)
