@@ -6,6 +6,7 @@ rm(list = ls())
 
 pacman::p_load(tidyverse,
                sjmisc,
+               sjPlot,
                haven,
                dplyr,
                car, 
@@ -113,6 +114,8 @@ data <- issp %>%
          often_stress = v31,
          often_home = v32,
          often_weekend = v33,
+         satisfied = v44,
+         proud = v49,
          EMPREL,
          ISCO08,
          WRKSUP,
@@ -124,9 +127,9 @@ data <- issp %>%
   mutate_if(is.labelled, as.numeric) %>% #Transformar en numeric 
   mutate_at(vars(WRKSUP, NSUP, EMPREL, ISCO08, starts_with("often")), ~(car::recode(.,
                                                       "0 = NA"))) %>% 
-  mutate_at(vars(WRKSUP, EMPREL, starts_with("pi"), starts_with("have"), starts_with("job"), starts_with("often"), SEX), ~(car::recode(.,
+  mutate_at(vars(WRKSUP, EMPREL, starts_with("pi"), starts_with("have"), starts_with("job"), starts_with("often"), SEX, proud, satisfied), ~(car::recode(.,
                                                 "c(8,9) = NA"))) %>% 
-  mutate_at(vars(starts_with("pi"), starts_with("have"), starts_with("often"), job_enjoy), ~(car::recode(.,
+  mutate_at(vars(starts_with("pi"), starts_with("have"), starts_with("often"), job_enjoy, proud), ~(car::recode(.,
                                           c("1 = 4;
                                             2 = 3;
                                             3 = 2;
@@ -138,6 +141,14 @@ data <- issp %>%
                                              3 = 2;
                                              4 = 3;
                                              5 = 4")),
+         satisfied = car::recode(.$satisfied,
+                                 recodes = c("1 = 7;
+                                             2 = 6;
+                                             3 = 5;
+                                             4 = 4;
+                                             5 = 3;
+                                             6 = 2;
+                                             7 = 1")),
          SEX = car::recode(.$SEX,
                            recodes = c("1 = 'Hombre';
                                        2 = 'Mujer';
@@ -180,9 +191,10 @@ data <- issp %>%
                                    'Experto directivo/supervisor',
                                    'Pequeña burguesia',
                                    'Pequeño empleador',
-                                   'Capitalista'))) %>%
+                                   'Capitalista')),
+        expresiva = ifelse(have_interest > 2, 1, 0)) %>%
  rowwise() %>%
- mutate(commitment_suma = sum(job_money, job_enjoy, na.rm = T),
+ mutate(strategic_suma = sum(job_money, job_enjoy, na.rm = T),
        have_suma = sum(have_security, have_income, have_advance, have_interest, have_indep, have_helpful, have_useful, na.rm = T),
        lack_security = have_security - pi_security,
        lack_income = have_income - pi_income,
@@ -192,22 +204,22 @@ data <- issp %>%
        lack_helpful = have_helpful - pi_helpful,
        lack_useful = have_useful - pi_useful,
        lack_suma = sum(lack_security, lack_income, lack_advance, lack_interest, lack_indep, lack_helpful, lack_useful, na.rm = T),
-       exigencia_suma = sum(often_phys, often_stress, often_home, often_weekend, na.rm = T)) %>%
- mutate(commitment_index = (commitment_suma/max(.$commitment_suma) * 100),
-       have_index = (have_suma/max(.$have_suma) * 100),
-       lack_index = (lack_suma/max(.$lack_suma) * 100),
-       exigencia_index = (exigencia_suma/max(.$exigencia_suma) * 100)) %>%
+       pm_suma = sum(pi_useful, pi_helpful, na.rm = T),
+       expr_suma = sum(pi_interest, pi_indep, na.rm = T)) %>%
+  mutate(strategic_index = (strategic_suma/max(.$strategic_suma) * 100),
+        have_index = (have_suma/max(.$have_suma) * 100),
+        lack_index = (lack_suma/max(.$lack_suma) * -100),
+        pm_index = (pm_suma/max(.$pm_suma) * 100),
+        expr_index = (expr_suma/max(.$expr_suma) * 100)) %>%
  ungroup() %>%
  mutate_at(vars(ends_with("index")), ~(car::recode(., "0 = NA"))) %>% 
  select(-c(EMPREL, ISCO08, WRKSUP, NSUP, propiedad, habilidades, starts_with("pi"), 
            starts_with("job"), have_security, have_income, have_advance,
            have_interest, have_indep, have_helpful, have_useful, 
-           starts_with("often"), ends_with("suma"),
+           starts_with("often"), #ends_with("suma"),
            lack_security, lack_income, lack_advance, lack_interest, lack_indep,
            lack_helpful, lack_useful))
  
-
-
 
 # Variables indices
 ## Employment commitment
@@ -243,6 +255,16 @@ data <- issp %>%
 
 jogRu::ordinal_alpha(data %>% select(starts_with("pi_")))
 
+jogRu::ordinal_alpha(data %>% select(14:15))
+
+jogRu::ordinal_alpha(data %>% select(21:22))
+
+jogRu::ordinal_alpha(data %>% select(pi_interest, pi_indep))
+
+jogRu::ordinal_alpha(data %>% select(pi_helpful, pi_useful))
+
+jogRu::ordinal_alpha(data %>% select(proud, satisfied))
+
 jogRu::ordinal_alpha(data %>% select(16:22))
 
 jogRu::ordinal_alpha(data %>% select(starts_with("often_")))
@@ -275,4 +297,11 @@ m <- merge(data, context,
 
 # 6. Exportar datos -------------------------------------------------------
 
+library(MASS)
+y <- polr(as_factor(strategic_suma) ~ clase + SEX + AGE + have_index, data)
+x <- polr(as_factor(pm_suma) ~ clase + SEX + AGE + have_index, data)
+z <- polr(as_factor(expr_suma) ~ clase + SEX + AGE + have_index, data)
 
+a <- lm(strategic_suma ~ clase + SEX + AGE + have_index, data)
+b <- lm(pm_suma ~ clase + SEX + AGE + have_index, data)
+c <- lm(expr_suma ~ clase + SEX + AGE + have_index, data)
