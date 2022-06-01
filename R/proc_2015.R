@@ -103,6 +103,8 @@ data <- issp %>%
          pi_indep = v7, 
          pi_helpful = v8, 
          pi_useful = v9,
+         pi_decide = v10,
+         pi_contact = v11,
          have_security = v22,
          have_income = v23,
          have_advance = v24,
@@ -259,7 +261,7 @@ jogRu::ordinal_alpha(data %>% select(14:15))
 
 jogRu::ordinal_alpha(data %>% select(21:22))
 
-jogRu::ordinal_alpha(data %>% select(pi_interest, pi_indep))
+jogRu::ordinal_alpha(data %>% select(pi_interest, pi_indep, pi_decide, pi_contact))
 
 jogRu::ordinal_alpha(data %>% select(pi_helpful, pi_useful))
 
