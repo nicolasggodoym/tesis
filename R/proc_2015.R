@@ -6,7 +6,7 @@ rm(list = ls())
 
 pacman::p_load(tidyverse,
                sjmisc,
-               sjPlot,
+               stringr,
                haven,
                dplyr,
                car, 
@@ -89,7 +89,8 @@ frq(issp$SEX)
 data <- issp %>% 
   filter((ISCO08!=110 | ISCO08!=210 | ISCO08!=310) & v20 == 1) %>% #Eliminar FFAA
   select(id = CASEID,
-         iso3c = c_alphan,
+         country,
+         iso2c = c_alphan,
          year = DATEYR,
          exp = WEIGHT,
          SEX,
@@ -126,6 +127,7 @@ data <- issp %>%
   
 ### b) Procesamiento -------------------------------------------------------------------------
 
+  mutate(country = as_factor(.$country)) %>% 
   mutate_if(is.labelled, as.numeric) %>% #Transformar en numeric 
   mutate_at(vars(WRKSUP, NSUP, EMPREL, ISCO08, starts_with("often")), ~(car::recode(.,
                                                       "0 = NA"))) %>% 
@@ -137,7 +139,8 @@ data <- issp %>%
                                             3 = 2;
                                             4 = 1;
                                             5 = 0")))) %>% 
-  mutate(job_money = car::recode(.$job_money, 
+  mutate(country = str_sub(.$country, start = 4, -1), 
+         job_money = car::recode(.$job_money, 
                                  recodes = c("1 = 0;
                                              2 = 1;
                                              3 = 2;
@@ -207,7 +210,7 @@ data <- issp %>%
        lack_useful = have_useful - pi_useful,
        lack_suma = sum(lack_security, lack_income, lack_advance, lack_interest, lack_indep, lack_helpful, lack_useful, na.rm = T),
        pm_suma = sum(pi_useful, pi_helpful, na.rm = T),
-       expr_suma = sum(pi_interest, pi_indep, na.rm = T)) %>%
+       expr_suma = sum(pi_interest, pi_indep, pi_decide, pi_contact, na.rm = T)) %>%
   mutate(strategic_index = (strategic_suma/max(.$strategic_suma) * 100),
         have_index = (have_suma/max(.$have_suma) * 100),
         lack_index = (lack_suma/max(.$lack_suma) * -100),
@@ -216,7 +219,8 @@ data <- issp %>%
  ungroup() %>%
  mutate_at(vars(ends_with("index")), ~(car::recode(., "0 = NA"))) %>% 
  select(-c(EMPREL, ISCO08, WRKSUP, NSUP, propiedad, habilidades, starts_with("pi"), 
-           starts_with("job"), have_security, have_income, have_advance,
+           starts_with("job"), satisfied, proud,
+           have_security, have_income, have_advance,
            have_interest, have_indep, have_helpful, have_useful, 
            starts_with("often"), #ends_with("suma"),
            lack_security, lack_income, lack_advance, lack_interest, lack_indep,
@@ -270,28 +274,6 @@ jogRu::ordinal_alpha(data %>% select(proud, satisfied))
 jogRu::ordinal_alpha(data %>% select(16:22))
 
 jogRu::ordinal_alpha(data %>% select(starts_with("often_")))
-
-
-## Macro nivel ---------------------------------------
-
-### Cargar datos ------------------------------------------------------------
-
-load(url("https://github.com/fabrica-datos-laborales/fdl-data/raw/main/output/data/fdl.RData"))  
-
-### Seleccionar y filtrar ---------------------------------------------------
-
-context <- fdl %>% filter(year == 2019) %>% select(iso3c, 'nstrikes_isic31_total_ilo-stat', 'cbc_ilo-stat')
-rm(list_fdl)
-
-
-### Recodificar y transformar -----------------------------------------------
-
-
-
-# Unificar con merge() -----------------------------------------------------------------
-
-m <- merge(data, context,
-           by = "iso3c", all.x = T)
 
 
 # 5. Etiquetado -----------------------------------------------------------
