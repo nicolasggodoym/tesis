@@ -1,7 +1,6 @@
 
 # Código de procesamiento ISSP 2015 -------------------------------------------------
 
-rm(list = ls())
 # 1. Cargar librerías  ----------------------------------------------------
 
 pacman::p_load(tidyverse,
@@ -10,10 +9,12 @@ pacman::p_load(tidyverse,
                haven,
                dplyr,
                car, 
-               remotes)
+               remotes,
+               survey, 
+               srvyr)
 
 #Para alfa ordinal
-remotes::install_github("jogrue/jogRu", force = T)
+#remotes::install_github("jogrue/jogRu", force = T)
 
 # 2. Cargar datos ---------------------------------------------------------
 
@@ -24,61 +25,61 @@ issp <- read_dta("input/data/issp_2015.dta")
 # Variables de interés
 
 # Have index
-find_var(issp, "Q12a") #v22 Q12a Apply to R's job: my job is secure
-find_var(issp, "Q12b") #v23 Q12b Apply to R's job: my income is high
-find_var(issp, "Q12c") #v24 Q12c Apply to R's job: opportunities for advancement are high
-find_var(issp, "Q12d") #v25 Q12d Apply to R's job: my job is interesting
-find_var(issp, "Q12e") #v26 Q12e Apply to R's job: can work independently
-find_var(issp, "Q12f") #v27 Q12f Apply to R's job: can help other people
-find_var(issp, "Q12g") #v28 Q12g Apply to R's job: job is useful to society
+# find_var(issp, "Q12a") #v22 Q12a Apply to R's job: my job is secure
+# find_var(issp, "Q12b") #v23 Q12b Apply to R's job: my income is high
+# find_var(issp, "Q12c") #v24 Q12c Apply to R's job: opportunities for advancement are high
+# find_var(issp, "Q12d") #v25 Q12d Apply to R's job: my job is interesting
+# find_var(issp, "Q12e") #v26 Q12e Apply to R's job: can work independently
+# find_var(issp, "Q12f") #v27 Q12f Apply to R's job: can help other people
+# find_var(issp, "Q12g") #v28 Q12g Apply to R's job: job is useful to society
 
 # Lack index
-find_var(issp, "Q2a") #v3 Q2a Personally important: job security
-find_var(issp, "Q2b") #v4 Q2b Personally important: high income
-find_var(issp, "Q2c") #v5 Q2c Personally important: opportunities for advancement
-find_var(issp, "Q2d") #v6 Q2d Personally important: an interesting job
-find_var(issp, "Q2e") #v7 Q2e Personally important: work independently
-find_var(issp, "Q2f") #v8 Q2f Personally important: help other people
-find_var(issp, "Q2g") #v9 Q2g Personally important: a job useful to society
+# find_var(issp, "Q2a") #v3 Q2a Personally important: job security
+# find_var(issp, "Q2b") #v4 Q2b Personally important: high income
+# find_var(issp, "Q2c") #v5 Q2c Personally important: opportunities for advancement
+# find_var(issp, "Q2d") #v6 Q2d Personally important: an interesting job
+# find_var(issp, "Q2e") #v7 Q2e Personally important: work independently
+# find_var(issp, "Q2f") #v8 Q2f Personally important: help other people
+# find_var(issp, "Q2g") #v9 Q2g Personally important: a job useful to society
 
 # Valoración no-mercantil del trabajo remunerado
-find_var(issp, "Q1a") #v1 Q1a Job is a way of earning money - no more
-find_var(issp, "Q1b") #v2 Q1b Enjoy a paid job even if I did not need money
+# find_var(issp, "Q1a") #v1 Q1a Job is a way of earning money - no more
+# find_var(issp, "Q1b") #v2 Q1b Enjoy a paid job even if I did not need money
 
 # Índice de sobreexigencia laboral
-find_var(issp, "Q13a") #v30 Q13a How often applies: Do hard physical work
-find_var(issp, "Q13b") #v31 Q13b How often applies: find work stressful
-find_var(issp, "Q14a") #v32 Q14a And how often applies: work at home during working hours
-find_var(issp, "Q14b") #v33 Q14b And how often applies: involve working on weekends
+# find_var(issp, "Q13a") #v30 Q13a How often applies: Do hard physical work
+# find_var(issp, "Q13b") #v31 Q13b How often applies: find work stressful
+# find_var(issp, "Q14a") #v32 Q14a And how often applies: work at home during working hours
+# find_var(issp, "Q14b") #v33 Q14b And how often applies: involve working on weekends
 
 # Variables predictoras (clase social y control)
-find_var(issp, "EMP") #EMPREL Employment relationship
-find_var(issp, "ISCO") #ISCO08
-find_var(issp, "Supervise") #WRKSUP Supervise other employees
-find_var(issp, "Number") #NSUP Number of other employees supervised
-find_var(issp, "SEX") #SEX Sex of Respondent
-find_var(issp, "Country") #c_alphan Country Prefix ISO 3166 Code - alphanumeric
-find_var(issp, "ID") #CASEID ID Number of Respondent
-find_var(issp, "WEIGHT") #WEIGHT Weighting factor
-find_var(issp, "DATE") #DATEYR Year of interview: YYYY (four digits)
-find_var(issp, "UNION") #UNION Trade union membership
+# find_var(issp, "EMP") #EMPREL Employment relationship
+# find_var(issp, "ISCO") #ISCO08
+# find_var(issp, "Supervise") #WRKSUP Supervise other employees
+# find_var(issp, "Number") #NSUP Number of other employees supervised
+# find_var(issp, "SEX") #SEX Sex of Respondent
+# find_var(issp, "Country") #c_alphan Country Prefix ISO 3166 Code - alphanumeric
+# find_var(issp, "ID") #CASEID ID Number of Respondent
+# find_var(issp, "WEIGHT") #WEIGHT Weighting factor
+# find_var(issp, "DATE") #DATEYR Year of interview: YYYY (four digits)
+# find_var(issp, "UNION") #UNION Trade union membership
 
 
-frq(issp$v5)
-frq(issp$v6)
-frq(issp$v8)
-frq(issp$v9)
-frq(issp$v13)
-frq(issp$v31)
-frq(issp$v44)
-frq(issp$v49)
-frq(issp$v1)
-frq(issp$v4)
+# frq(issp$v5)
+# frq(issp$v6)
+# frq(issp$v8)
+# frq(issp$v9)
+# frq(issp$v13)
+# frq(issp$v31)
+# frq(issp$v44)
+# frq(issp$v49)
+# frq(issp$v1)
+# frq(issp$v4)
 
-frq(issp$EMPREL)
-frq(issp$WRKSUP)
-frq(issp$NSUP)
-frq(issp$SEX)
+# frq(issp$EMPREL)
+# frq(issp$WRKSUP)
+# frq(issp$NSUP)
+# frq(issp$SEX)
 
 # 4. Seleccionar y procesar variables -------------------------------------
 
@@ -106,6 +107,8 @@ data <- issp %>%
          pi_useful = v9,
          pi_decide = v10,
          pi_contact = v11,
+         union_need = v17,
+         union_bad = v18,
          have_security = v22,
          have_income = v23,
          have_advance = v24,
@@ -123,7 +126,8 @@ data <- issp %>%
          ISCO08,
          WRKSUP,
          NSUP,
-         UNION) %>%
+         UNION,
+         sector = TYPORG2) %>%
   
 ### b) Procesamiento -------------------------------------------------------------------------
 
@@ -131,9 +135,12 @@ data <- issp %>%
   mutate_if(is.labelled, as.numeric) %>% #Transformar en numeric 
   mutate_at(vars(WRKSUP, NSUP, EMPREL, ISCO08, starts_with("often")), ~(car::recode(.,
                                                       "0 = NA"))) %>% 
-  mutate_at(vars(WRKSUP, EMPREL, starts_with("pi"), starts_with("have"), starts_with("job"), starts_with("often"), SEX, proud, satisfied), ~(car::recode(.,
+  mutate_at(vars(WRKSUP, EMPREL, starts_with("pi"), starts_with("have"), 
+                 starts_with("job"), starts_with("often"), SEX, proud, 
+                 starts_with("union"), satisfied), ~(car::recode(.,
                                                 "c(8,9) = NA"))) %>% 
-  mutate_at(vars(starts_with("pi"), starts_with("have"), starts_with("often"), job_enjoy, proud), ~(car::recode(.,
+  mutate_at(vars(starts_with("pi"), starts_with("have"), starts_with("often"), 
+                 job_enjoy, proud, union_need), ~(car::recode(.,
                                           c("1 = 4;
                                             2 = 3;
                                             3 = 2;
@@ -146,6 +153,16 @@ data <- issp %>%
                                              3 = 2;
                                              4 = 3;
                                              5 = 4")),
+         union_bad = car::recode(.$union_bad, 
+                                 recodes = c("1 = 0;
+                                             2 = 1;
+                                             3 = 2;
+                                             4 = 3;
+                                             5 = 4")),
+         sector = car::recode(.$sector,
+                              recodes = c("1 = 'Publico';
+                                          2 = 'Privado';
+                                          c(0, 8, 9) = NA")),
          satisfied = car::recode(.$satisfied,
                                  recodes = c("1 = 7;
                                              2 = 6;
@@ -210,12 +227,14 @@ data <- issp %>%
        lack_useful = have_useful - pi_useful,
        lack_suma = sum(lack_security, lack_income, lack_advance, lack_interest, lack_indep, lack_helpful, lack_useful, na.rm = T),
        pm_suma = sum(pi_useful, pi_helpful, na.rm = T),
-       expr_suma = sum(pi_interest, pi_indep, pi_decide, pi_contact, na.rm = T)) %>%
+       expr_suma = sum(pi_interest, pi_indep, pi_decide, pi_contact, na.rm = T),
+       apoyo_suma = sum(union_need, union_bad, na.rm = T)) %>%
   mutate(strategic_index = (strategic_suma/max(.$strategic_suma) * 100),
         have_index = (have_suma/max(.$have_suma) * 100),
         lack_index = (lack_suma/max(.$lack_suma) * -100),
         pm_index = (pm_suma/max(.$pm_suma) * 100),
-        expr_index = (expr_suma/max(.$expr_suma) * 100)) %>%
+        expr_index = (expr_suma/max(.$expr_suma) * 100),
+        apoyo_index = (apoyo_suma/max(.$expr_suma) * 100)) %>%
  ungroup() %>%
  mutate_at(vars(ends_with("index")), ~(car::recode(., "0 = NA"))) %>% 
  select(-c(EMPREL, ISCO08, WRKSUP, NSUP, propiedad, habilidades, starts_with("pi"), 
@@ -226,6 +245,27 @@ data <- issp %>%
            lack_security, lack_income, lack_advance, lack_interest, lack_indep,
            lack_helpful, lack_useful))
  
+
+
+# Estimar apoyo a nivel nacional ------------------------------------------
+
+apoyo = data %>% 
+  select(1, 2, 4, 5, 25) %>% 
+  as_survey_design(ids = 1,
+                   weights = exp) %>% 
+  group_by(country) %>% 
+  summarise(apoyo_nacional = survey_mean(apoyo_index, na.rm = T)) %>% 
+  ungroup() %>% 
+  select(1, 2)
+
+
+# Pegar apoyo nacional a datos micro --------------------------------------
+
+data = merge(data, apoyo, 
+             by = "country",
+             all = T)
+
+rm(issp, apoyo)
 
 # Variables indices
 ## Employment commitment
@@ -259,42 +299,37 @@ data <- issp %>%
 ### often_home
 ### often_weekend
 
-jogRu::ordinal_alpha(data %>% select(starts_with("pi_")))
-
-jogRu::ordinal_alpha(data %>% select(14:15))
-
-jogRu::ordinal_alpha(data %>% select(21:22))
-
-jogRu::ordinal_alpha(data %>% select(pi_interest, pi_indep, pi_decide, pi_contact))
-
-jogRu::ordinal_alpha(data %>% select(pi_helpful, pi_useful))
-
-jogRu::ordinal_alpha(data %>% select(proud, satisfied))
-
-jogRu::ordinal_alpha(data %>% select(16:22))
-
-jogRu::ordinal_alpha(data %>% select(starts_with("often_")))
-
-
-# 5. Etiquetado -----------------------------------------------------------
+# jogRu::ordinal_alpha(data %>% select(starts_with("pi_")))
+# 
+# jogRu::ordinal_alpha(data %>% select(14:15))
+# 
+# jogRu::ordinal_alpha(data %>% select(21:22))
+# 
+# jogRu::ordinal_alpha(data %>% select(pi_interest, pi_indep, pi_decide, pi_contact))
+# 
+# jogRu::ordinal_alpha(data %>% select(pi_helpful, pi_useful))
+# 
+# jogRu::ordinal_alpha(data %>% select(proud, satisfied))
+# 
+# jogRu::ordinal_alpha(data %>% select(16:22))
+# 
+# jogRu::ordinal_alpha(data %>% select(starts_with("often_")))
 
 
-# 6. Exportar datos -------------------------------------------------------
+# data <- data %>% 
+#   mutate_at(vars(strategic_suma, pm_suma, expr_suma), ~(car::recode(., c("c(0,1,2) = 0;
+#                                                           c(3,4,5) = 1;
+#                                                           c(6,7,8) = 2"))))
+# data$strategic_suma <- car::recode(data$strategic_suma, c("c(0,1,2) = 0;
+#                                                           c(3,4,5) = 1;
+#                                                           c(6,7,8) = 2"))
+# 
+# library(MASS)
+# x <- polr(as_factor(strategic_suma) ~ clase + SEX + AGE + have_index, data)
+# y <- polr(as_factor(pm_suma) ~ clase + SEX + AGE + have_index, data)
+# z <- polr(as_factor(expr_suma) ~ clase + SEX + AGE + have_index, data)
+# 
+# a <- lm(strategic_suma ~ clase + SEX + AGE + have_index, data)
+# b <- lm(pm_suma ~ clase + SEX + AGE + have_index, data)
+# c <- lm(expr_suma ~ clase + SEX + AGE + have_index, data)
 
-
-data <- data %>% 
-  mutate_at(vars(strategic_suma, pm_suma, expr_suma), ~(car::recode(., c("c(0,1,2) = 0;
-                                                          c(3,4,5) = 1;
-                                                          c(6,7,8) = 2"))))
-data$strategic_suma <- car::recode(data$strategic_suma, c("c(0,1,2) = 0;
-                                                          c(3,4,5) = 1;
-                                                          c(6,7,8) = 2"))
-
-library(MASS)
-x <- polr(as_factor(strategic_suma) ~ clase + SEX + AGE + have_index, data)
-y <- polr(as_factor(pm_suma) ~ clase + SEX + AGE + have_index, data)
-z <- polr(as_factor(expr_suma) ~ clase + SEX + AGE + have_index, data)
-
-a <- lm(strategic_suma ~ clase + SEX + AGE + have_index, data)
-b <- lm(pm_suma ~ clase + SEX + AGE + have_index, data)
-c <- lm(expr_suma ~ clase + SEX + AGE + have_index, data)
