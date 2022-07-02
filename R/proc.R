@@ -9,8 +9,10 @@ source("R/proc_2015.R")
 source("R/proc_ctry_lvl.R")
 
 # Unificar datos ----------------------------------------------------------
-final <- merge(data, ctry_lvl, by = "iso2c")
-final_dpi <- merge(data, ctry_lvl_dpi, by = "iso2c")
+final <- merge(data, ctry_lvl, by = "iso2c") %>% 
+  select(-c(country.x, country.y, year.x, year.y))
+final_dpi <- merge(data, ctry_lvl_dpi, by = "iso2c") %>% 
+  select(-c(country.x, country.y, year.x, year.y))
 
 rm(ctry_lvl, ctry_lvl_dpi, data)
 

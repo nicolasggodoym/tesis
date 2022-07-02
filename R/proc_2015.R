@@ -123,6 +123,7 @@ data <- issp %>%
          satisfied = v44,
          proud = v49,
          EMPREL,
+         NEMPLOY,
          ISCO08,
          WRKSUP,
          NSUP,
@@ -159,6 +160,10 @@ data <- issp %>%
                                              3 = 2;
                                              4 = 3;
                                              5 = 4")),
+         NEMPLOY = case_when(NEMPLOY < 3 ~ "1 o 2 empleados",
+                             NEMPLOY > 2 & NEMPLOY < 50 ~ "3 a 49 empleados",
+                             NEMPLOY > 49 & NEMPLOY < 9998 ~ "Más de 50 empleados",
+                             TRUE ~ NA_character_), 
          sector = car::recode(.$sector,
                               recodes = c("1 = 'Publico';
                                           2 = 'Privado';
@@ -182,9 +187,8 @@ data <- issp %>%
         propiedad = car::recode(.$EMPREL,
                                  recodes = c("1 = 'No propietario';
                                              2 = 'Pequeña burguesia';
-                                             3 = 'Pequeño empleador';
-                                             4 = 'Capitalista';
-                                             5 = 'Propietario de negocio familiar'")),
+                                             3 = 'Propietario';
+                                             4 = 'Propietario de negocio familiar'")),
          ISCO08 = substr(.$ISCO08, start = 1, stop = 2)) %>% 
          mutate(habilidades = car::recode(.$ISCO08, 
                                    recodes = "10:26= 'Experto';
@@ -195,9 +199,9 @@ data <- issp %>%
                                    99=NA"),
          
 ### c) Construcción de la variable clase social (clase) ---------------------
-         clase = factor(case_when(propiedad == 'Capitalista' ~ 'Capitalista',
-                                  propiedad == 'Pequeño empleador' ~ 'Pequeño empleador',
-                                  propiedad == 'Pequeña burguesia' ~ 'Pequeña burguesia',
+         clase = factor(case_when(propiedad == 'Propietario' & NEMPLOY == "Más de 50 empleados" ~ 'Capitalista',
+                                  (propiedad == 'Propietario' | propiedad == 'Propietario de negocio familiar') & NEMPLOY == "3 a 49 empleados" ~ 'Pequeño empleador',
+                                  propiedad == 'Pequeña burguesia' | ((propiedad == 'Propietario' | propiedad == 'Propietario de negocio familiar') & NEMPLOY == "1 o 2 empleados") ~ 'Pequeña burguesia',
                                   propiedad == 'No propietario' & WRKSUP == 1 & habilidades == 'Experto' ~ 'Experto directivo/supervisor',
                                   propiedad == 'No propietario' & WRKSUP == 1 & habilidades == 'Calificado' ~ 'Directivo/supervisor semi-credencializado',
                                   propiedad == 'No propietario' & WRKSUP == 1 & habilidades == 'No calificado' ~ 'Directivo/supervisor no credencializado',
@@ -250,7 +254,7 @@ data <- issp %>%
 # Estimar apoyo a nivel nacional ------------------------------------------
 
 apoyo = data %>% 
-  select(1, 2, 4, 5, 25) %>% 
+  select(1, 2, 4, 5, 26) %>% 
   as_survey_design(ids = 1,
                    weights = exp) %>% 
   group_by(country) %>% 
