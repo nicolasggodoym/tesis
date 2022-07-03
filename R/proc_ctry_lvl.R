@@ -21,7 +21,7 @@ source("R/ilostat.R")
 
 ### Poder institucional: DPI ------------------------------------------------
 
-source("R/dpi.R")
+#source("R/dpi.R")
 
 ### Poder asociativo e institucional: LRI -----------------------------------
 
@@ -36,7 +36,7 @@ country_codes <- country_codes %>%
                       "ES", "FI", "FR", "GB", "GE", "HR", "HU", "IL", "IN",
                       "IS", "JP", "LT", "LV", "MX", "NO", "NZ", "PH", "PL", "RU",
                       "SE", "SI", "SK", "SR", "TW", "US", "VE", "ZA")) %>% 
-  select(-numeric)
+  select(-numeric, - country)
 
 #### Crear vectores para filtrado
 v_iso2c = country_codes$iso2c
@@ -47,29 +47,60 @@ v_country = country_codes$country
 # ILO-STAT ----------------------------------------------------------------
 
 tud <- tud %>% 
-  filter(iso3c %in% c(v_iso3c) & year == 2015)
+  filter(iso3c %in% c(v_iso3c) & (year > 2010 & year < 2018))
 
 plp <- plp %>% 
-  filter(iso3c %in% c(v_iso3c) & year == 2015)
+  filter(iso3c %in% c(v_iso3c) & (year > 2010 & year < 2018))
 
 # DPI ---------------------------------------------------------------------
 
-dpi <- dpi %>% 
-  filter(country %in% c(v_country) & year == 2015) 
+#dpi <- dpi %>% 
+#  filter(country %in% c(v_country) & (year > 2010 & year < 2018)) 
 
 # LRI ---------------------------------------------------------------------
 
 lri <- lri %>% 
-  filter(iso3c %in% c(v_iso3c) & year == 2015)
+  filter(iso3c %in% c(v_iso3c) & (year > 2010 & year < 2018))
 
+
+imp <- data.frame(iso3c = v_iso3c, year = 2015, plp = NA, densidad = NA, lri = NA)
+
+imp_tud = imp %>% filter(iso3c %in% c("IND", "ISR", "POL", "TWN", "VEN")) %>% 
+  select(iso3c, year, densidad)
+
+imp_plp = imp %>% filter(iso3c %in% c("IND", "PHL", "SUR", "POL", "VEN")) %>% 
+  select(iso3c, year, plp)
 
 # Unificar  ---------------------------------------------------------------
 
-ctry_lvl <- list(country_codes, lri, plp, tud) %>% 
-  Reduce(function(x,y) merge(x,y, by = "iso3c"), .)
+# Pegar country_codes a cada df
 
-dpi <- merge(country_codes, dpi, by = "country") %>% select(-country)
+#tud = merge(country_codes, tud, by = "iso3c")
+#lri = merge(country_codes, lri, by = "iso3c")
+#plp = merge(country_codes, plp, by = "iso3c")
 
-ctry_lvl_dpi = merge(ctry_lvl, dpi)
+# Pegar valores nulos y ordenar df
 
-rm(country_codes, lri, plp, tud, dpi, v_country, v_iso2c, v_iso3c)
+ctry_lvl <- list(lri, plp, tud) %>% 
+  Reduce(function(x,y) merge(x,y, by = c("iso3c", "year"), all = T), .)
+
+ctry_lvl <- merge(ctry_lvl, imp_tud, by = c("iso3c", "year", "densidad"), all = T)
+
+#ctry_lvl <- merge(ctry_lvl, imp_plp, by = c("iso3c", "year", "plp"), all = T)
+
+
+# Imputar valores NA 2015 -------------------------------------------------
+
+ctry_lvl = ctry_lvl %>% 
+  mutate_at(vars(plp, densidad, lri), 
+            ~(ifelse(is.na(.) & lag(iso3c) == iso3c, na.locf(.), 
+                ifelse(is.na(.) & lead(iso3c) == iso3c,
+                       na.locf(., fromLast = T),
+                       .)))) %>% 
+  filter(year == 2015 & iso3c != "PHL")
+
+#dpi <- merge(country_codes, dpi, by = "country") %>% select(-country)
+
+#ctry_lvl_dpi = merge(ctry_lvl, dpi)
+
+rm(country_codes, lri, plp, tud, v_country, v_iso2c, v_iso3c, imp_plp, imp_tud, imp)

@@ -1,7 +1,7 @@
 
 # Procesamiento general ---------------------------------------------------
 
-
+rm(list = ls())
 # Variables micro ---------------------------------------------------------
 source("R/proc_2015.R")
 
@@ -9,12 +9,16 @@ source("R/proc_2015.R")
 source("R/proc_ctry_lvl.R")
 
 # Unificar datos ----------------------------------------------------------
-final <- merge(data, ctry_lvl, by = "iso2c") %>% 
-  select(-c(country.x, country.y, year.x, year.y))
-final_dpi <- merge(data, ctry_lvl_dpi, by = "iso2c") %>% 
-  select(-c(country.x, country.y, year.x, year.y))
+final <- merge(data, ctry_lvl, by = c("iso3c", "year"), all = T)
 
-rm(ctry_lvl, ctry_lvl_dpi, data)
+final <- filter(final, !is.na(id))
+
+#final_dpi <- merge(data, ctry_lvl_dpi, by = "iso2c") %>% 
+#  select(-c(country.x, country.y, year.x, year.y))
+
+rm(ctry_lvl, 
+   #ctry_lvl_dpi, 
+   data)
 
 # Etiquetado de variables -------------------------------------------------
 
@@ -22,5 +26,5 @@ rm(ctry_lvl, ctry_lvl_dpi, data)
 # Exportar ----------------------------------------------------------------
 
 saveRDS(final, "output/data/data.rds")
-saveRDS(final_dpi, "output/data/data_dpi.rds")
-save(final, final_dpi, file = "output/data/data.RData")
+#saveRDS(final_dpi, "output/data/data_dpi.rds")
+#save(final, file = "output/data/data.RData")

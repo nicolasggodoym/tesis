@@ -20,6 +20,15 @@ pacman::p_load(tidyverse,
 
 issp <- read_dta("input/data/issp_2015.dta")
 
+country_codes <- readRDS("output/data/country-codes.rds")
+
+country_codes <- country_codes %>% 
+  filter(iso2c %in% c("AT", "AU", "BE", "CH", "CL", "CN", "CZ", "DE", "DK", "EE",
+                      "ES", "FI", "FR", "GB", "GE", "HR", "HU", "IL", "IN",
+                      "IS", "JP", "LT", "LV", "MX", "NO", "NZ", "PH", "PL", "RU",
+                      "SE", "SI", "SK", "SR", "TW", "US", "VE", "ZA")) %>% 
+  select(-c(numeric, country))
+
 # 3. Explorar -------------------------------------------------------------
 
 # Variables de interés
@@ -269,7 +278,11 @@ data = merge(data, apoyo,
              by = "country",
              all = T)
 
-rm(issp, apoyo)
+data = merge(data, country_codes, by = "iso2c")
+
+data = data %>% select(-iso2c)
+
+rm(issp, apoyo, country_codes)
 
 # Variables indices
 ## Employment commitment

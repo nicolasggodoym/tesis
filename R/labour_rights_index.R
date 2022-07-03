@@ -17,8 +17,7 @@ lri <- readxl::read_xlsx("input/data/Scores_2000-2017.xlsx",
 
 # Procesamiento -----------------------------------------------------------
 lri <- lri %>% 
-  select(country = 1,
-         iso3c = 3,
+  select(iso3c = 3,
          yr_2000 = 4,
          yr_2005 = 5,
          yr_2009 = 6,
@@ -28,8 +27,9 @@ lri <- lri %>%
          yr_2017 = 9)
 
 lri <- lri %>% 
-  pivot_longer(cols = -c(1,2),
+  pivot_longer(cols = -1,
                names_to = "year",
                values_to = "lri") %>% 
-  mutate(year = str_sub(.$year, start = 4, -1))
+  mutate(year = str_sub(.$year, start = 4, -1)) %>% 
+  mutate(year = as.numeric(.$year))
 
