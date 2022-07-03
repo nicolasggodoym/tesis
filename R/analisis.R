@@ -1,6 +1,7 @@
 rm(list = ls())
 pacman::p_load(lme4, sjmisc, sjPlot, tidyverse, lmerTest)
-load("output/data/data.RData")
+final <- readRDS("output/data/data.rds")
+#load("output/data/data.RData")
 
 #lme4::lmer(dep ~ indep + (1 | 2doNivel), data)
 
@@ -26,8 +27,8 @@ summary(str_apoyo)
 
 # Práctico-moral ----------------------------------------------------------
 
-pm <- lmer(pm_index ~ clase + have_index + plp + densidad + lri +
-                    apoyo_nacional + (1|iso2c), final)
+pm <- lmer(pm_index ~ clase + have_index + SEX + sector + (plp + densidad + lri +
+                                        apoyo_nacional|iso3c), final)
 
 pm_plp <- lmer(pm_index ~ clase + have_index + plp + (1|iso2c), final)
 summary(pm_plp)

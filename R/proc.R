@@ -9,7 +9,7 @@ source("R/proc_2015.R")
 source("R/proc_ctry_lvl.R")
 
 # Unificar datos ----------------------------------------------------------
-final <- merge(data, ctry_lvl, by = c("iso3c", "year"), all = T)
+final <- merge(data, ctry_lvl, by = "iso3c", all.x = T)
 
 final <- filter(final, !is.na(id))
 

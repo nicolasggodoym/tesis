@@ -101,7 +101,6 @@ data <- issp %>%
   select(id = CASEID,
          country,
          iso2c = c_alphan,
-         year = DATEYR,
          exp = WEIGHT,
          SEX,
          AGE,
@@ -151,24 +150,24 @@ data <- issp %>%
                                                 "c(8,9) = NA"))) %>% 
   mutate_at(vars(starts_with("pi"), starts_with("have"), starts_with("often"), 
                  job_enjoy, proud, union_need), ~(car::recode(.,
-                                          c("1 = 4;
-                                            2 = 3;
-                                            3 = 2;
-                                            4 = 1;
-                                            5 = 0")))) %>% 
+                                          c("1 = 0;
+                                             2 = 1;
+                                             3 = 2;
+                                             4 = 3;
+                                             5 = 4")))) %>% 
   mutate(country = str_sub(.$country, start = 4, -1), 
          job_money = car::recode(.$job_money, 
-                                 recodes = c("1 = 0;
-                                             2 = 1;
+                                 recodes = c("1 = 4;
+                                             2 = 3;
                                              3 = 2;
-                                             4 = 3;
-                                             5 = 4")),
+                                             4 = 1;
+                                             5 = 0")),
          union_bad = car::recode(.$union_bad, 
-                                 recodes = c("1 = 0;
-                                             2 = 1;
+                                 recodes = c("1 = 4;
+                                             2 = 3;
                                              3 = 2;
-                                             4 = 3;
-                                             5 = 4")),
+                                             4 = 1;
+                                             5 = 0")), 
          NEMPLOY = case_when(NEMPLOY < 3 ~ "1 o 2 empleados",
                              NEMPLOY > 2 & NEMPLOY < 50 ~ "3 a 49 empleados",
                              NEMPLOY > 49 & NEMPLOY < 9998 ~ "Más de 50 empleados",
@@ -263,7 +262,7 @@ data <- issp %>%
 # Estimar apoyo a nivel nacional ------------------------------------------
 
 apoyo = data %>% 
-  select(1, 2, 4, 5, 26) %>% 
+  select(1, 2, 4, 5, apoyo_index) %>% 
   as_survey_design(ids = 1,
                    weights = exp) %>% 
   group_by(country) %>% 

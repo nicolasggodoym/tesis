@@ -97,7 +97,8 @@ ctry_lvl = ctry_lvl %>%
                 ifelse(is.na(.) & lead(iso3c) == iso3c,
                        na.locf(., fromLast = T),
                        .)))) %>% 
-  filter(year == 2015 & iso3c != "PHL")
+  filter(year == 2015 & iso3c != "PHL") %>% 
+  select(-year)
 
 #dpi <- merge(country_codes, dpi, by = "country") %>% select(-country)
 

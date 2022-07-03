@@ -68,7 +68,7 @@ unemp <- unemp[
 
 unemp <- unemp %>% 
   #Transformar en tasa de ocupación
-  mutate_at(vars(EDU_AGGREGATE_TOTAL, EDU_AGGREGATE_LTB, EDU_AGGREGATE_BAS,
+  mutate_at(vars(EDU_AGGREGATE_LTB, EDU_AGGREGATE_BAS,
                  EDU_AGGREGATE_INT, EDU_AGGREGATE_ADV, EDU_AGGREGATE_X),
             ~((100 - .)/100)) %>% 
   mutate_at(vars(EDU_AGGREGATE_TOTAL, EDU_AGGREGATE_LTB, EDU_AGGREGATE_BAS,
@@ -92,13 +92,13 @@ plp = plp %>%
          ocupados_int = EDU_AGGREGATE_INT.x * EDU_AGGREGATE_INT.y,
          ocupados_adv = EDU_AGGREGATE_ADV.x * EDU_AGGREGATE_ADV.y,
          ocupados_x = EDU_AGGREGATE_X.x * EDU_AGGREGATE_X.y,
-         unemp_tot = EDU_AGGREGATE_TOTAL.x * EDU_AGGREGATE_TOTAL.y) %>% 
+         unemp_per = EDU_AGGREGATE_TOTAL.y) %>% 
   ungroup() %>% 
-  select(1,2, starts_with("ocupados"), unemp_tot) %>% 
+  select(1,2, starts_with("ocupados"), unemp_per) %>% 
   rowwise() %>% 
   mutate(plp_razon = ocupados_adv / (ocupados_ltb + ocupados_bas + 
                                        ocupados_int + ocupados_x),
-         inv_unemp = 1/unemp_tot) %>% 
+         inv_unemp = 1/unemp_per) %>% 
   mutate(plp = plp_razon + inv_unemp) %>% 
   ungroup() %>% 
   select(1,2, plp)
