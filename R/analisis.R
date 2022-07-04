@@ -27,7 +27,7 @@ summary(str_apoyo)
 
 # Práctico-moral ----------------------------------------------------------
 
-pm <- lmer(pm_index ~ clase + have_index + SEX + sector + (plp + densidad + lri +
+pm <- lmer(pm_index ~ clase + SEX + sector + (plp + densidad + lri +
                                         apoyo_nacional|iso3c), final)
 
 pm_plp <- lmer(pm_index ~ clase + have_index + plp + (1|iso2c), final)

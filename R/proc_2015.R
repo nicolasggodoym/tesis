@@ -150,24 +150,24 @@ data <- issp %>%
                                                 "c(8,9) = NA"))) %>% 
   mutate_at(vars(starts_with("pi"), starts_with("have"), starts_with("often"), 
                  job_enjoy, proud, union_need), ~(car::recode(.,
-                                          c("1 = 0;
+                                          c("1 = 4;
+                                            2 = 3;
+                                            3 = 2;
+                                            4 = 1;
+                                            5 = 0")))) %>% 
+  mutate(country = str_sub(.$country, start = 4, -1), 
+         job_money = car::recode(.$job_money, 
+                                 recodes = c("1 = 0;
                                              2 = 1;
                                              3 = 2;
                                              4 = 3;
-                                             5 = 4")))) %>% 
-  mutate(country = str_sub(.$country, start = 4, -1), 
-         job_money = car::recode(.$job_money, 
-                                 recodes = c("1 = 4;
-                                             2 = 3;
-                                             3 = 2;
-                                             4 = 1;
-                                             5 = 0")),
+                                             5 = 4")),
          union_bad = car::recode(.$union_bad, 
-                                 recodes = c("1 = 4;
-                                             2 = 3;
+                                 recodes = c("1 = 0;
+                                             2 = 1;
                                              3 = 2;
-                                             4 = 1;
-                                             5 = 0")), 
+                                             4 = 3;
+                                             5 = 4")), 
          NEMPLOY = case_when(NEMPLOY < 3 ~ "1 o 2 empleados",
                              NEMPLOY > 2 & NEMPLOY < 50 ~ "3 a 49 empleados",
                              NEMPLOY > 49 & NEMPLOY < 9998 ~ "Más de 50 empleados",
@@ -248,7 +248,7 @@ data <- issp %>%
         expr_index = (expr_suma/max(.$expr_suma) * 100),
         apoyo_index = (apoyo_suma/max(.$expr_suma) * 100)) %>%
  ungroup() %>%
- mutate_at(vars(ends_with("index")), ~(car::recode(., "0 = NA"))) %>% 
+ #mutate_at(vars(ends_with("index")), ~(car::recode(., "0 = NA"))) %>% 
  select(-c(EMPREL, ISCO08, WRKSUP, NSUP, propiedad, habilidades, starts_with("pi"), 
            starts_with("job"), satisfied, proud,
            have_security, have_income, have_advance,
@@ -279,7 +279,7 @@ data = merge(data, apoyo,
 
 data = merge(data, country_codes, by = "iso2c")
 
-data = data %>% select(-iso2c)
+data = data %>% select(-c(iso2c, country))
 
 rm(issp, apoyo, country_codes)
 
@@ -315,22 +315,53 @@ rm(issp, apoyo, country_codes)
 ### often_home
 ### often_weekend
 
+# Alfa ordinal
+
 # jogRu::ordinal_alpha(data %>% select(starts_with("pi_")))
-# 
-# jogRu::ordinal_alpha(data %>% select(14:15))
-# 
-# jogRu::ordinal_alpha(data %>% select(21:22))
 # 
 # jogRu::ordinal_alpha(data %>% select(pi_interest, pi_indep, pi_decide, pi_contact))
 # 
 # jogRu::ordinal_alpha(data %>% select(pi_helpful, pi_useful))
-# 
-# jogRu::ordinal_alpha(data %>% select(proud, satisfied))
-# 
-# jogRu::ordinal_alpha(data %>% select(16:22))
-# 
-# jogRu::ordinal_alpha(data %>% select(starts_with("often_")))
 
+# Análisis factorial
+
+# x <- data %>% select(starts_with("pi"), starts_with("job"))
+# 
+# library(RcmdrMisc)
+# 
+# rcorr.adjust(x, use="pairwise.complete.obs")
+# 
+# cor(x, use="pairwise.complete.obs")
+# 
+# library(psych)
+# 
+# KMO(x)
+# 
+# x <- x %>%  #select(-c(pi_income, job_money)) %>%
+#   na.omit(.)
+# 
+# KMO(x)
+# 
+# cortest.bartlett(x)
+# 
+# ev <- eigen(cor(x, use="pairwise.complete.obs")) # get eigenvalues
+# ev$values
+# 
+# scree(x, pc=FALSE)
+# 
+# fa.parallel(x, fa="fa")
+# 
+# fit <- factanal(x, 4, rotation="equamax")
+# 
+# print(fit, digits=2, cutoff=0.3, sort=TRUE)
+# 
+# loads <- fit$loadings
+# 
+# fa.diagram(loads)
+
+# Resultado: sólo nos quedamos con un factor (pm)
+
+# Recodificación en ordinal
 
 # data <- data %>% 
 #   mutate_at(vars(strategic_suma, pm_suma, expr_suma), ~(car::recode(., c("c(0,1,2) = 0;

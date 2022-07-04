@@ -11,7 +11,7 @@ source("R/proc_ctry_lvl.R")
 # Unificar datos ----------------------------------------------------------
 final <- merge(data, ctry_lvl, by = "iso3c", all.x = T)
 
-final <- filter(final, !is.na(id))
+final <- filter(final, !is.na(id) & iso3c != "PHL")
 
 #final_dpi <- merge(data, ctry_lvl_dpi, by = "iso2c") %>% 
 #  select(-c(country.x, country.y, year.x, year.y))
@@ -19,6 +19,13 @@ final <- filter(final, !is.na(id))
 rm(ctry_lvl, 
    #ctry_lvl_dpi, 
    data)
+
+
+# Pegar country code en español -------------------------------------------
+
+esp <- readRDS("output/data/country-codes_esp.rds")
+
+final <- merge(final, esp, by = "iso3c", all.x = T)
 
 # Etiquetado de variables -------------------------------------------------
 

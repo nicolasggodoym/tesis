@@ -27,6 +27,11 @@ source("R/ilostat.R")
 
 source("R/labour_rights_index.R")
 
+
+### Adjusted net national income per capita ---------------------------------
+
+source("R/world-bank.R")
+
 ## Seleccionar y filtrar ---------------------------------------------------
 
 ### Filtrar países de interés -----------------------------------------------
@@ -63,6 +68,12 @@ lri <- lri %>%
   filter(iso3c %in% c(v_iso3c) & (year > 2010 & year < 2018))
 
 
+# World Bank --------------------------------------------------------------
+
+wb <- wb %>% 
+  filter(iso3c %in% c(v_iso3c) & (year > 2010 & year < 2018))
+
+
 imp <- data.frame(iso3c = v_iso3c, year = 2015, plp = NA, densidad = NA, lri = NA)
 
 imp_tud = imp %>% filter(iso3c %in% c("IND", "ISR", "POL", "TWN", "VEN")) %>% 
@@ -81,7 +92,7 @@ imp_plp = imp %>% filter(iso3c %in% c("IND", "PHL", "SUR", "POL", "VEN")) %>%
 
 # Pegar valores nulos y ordenar df
 
-ctry_lvl <- list(lri, plp, tud) %>% 
+ctry_lvl <- list(lri, plp, tud, wb) %>% 
   Reduce(function(x,y) merge(x,y, by = c("iso3c", "year"), all = T), .)
 
 ctry_lvl <- merge(ctry_lvl, imp_tud, by = c("iso3c", "year", "densidad"), all = T)
@@ -92,7 +103,7 @@ ctry_lvl <- merge(ctry_lvl, imp_tud, by = c("iso3c", "year", "densidad"), all = 
 # Imputar valores NA 2015 -------------------------------------------------
 
 ctry_lvl = ctry_lvl %>% 
-  mutate_at(vars(plp, densidad, lri), 
+  mutate_at(vars(plp, densidad, lri, nni_pc), 
             ~(ifelse(is.na(.) & lag(iso3c) == iso3c, na.locf(.), 
                 ifelse(is.na(.) & lead(iso3c) == iso3c,
                        na.locf(., fromLast = T),
@@ -104,4 +115,4 @@ ctry_lvl = ctry_lvl %>%
 
 #ctry_lvl_dpi = merge(ctry_lvl, dpi)
 
-rm(country_codes, lri, plp, tud, v_country, v_iso2c, v_iso3c, imp_plp, imp_tud, imp)
+rm(country_codes, lri, plp, tud, v_country, v_iso2c, v_iso3c, imp_plp, imp_tud, imp, wb)
