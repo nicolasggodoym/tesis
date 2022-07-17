@@ -1,5 +1,5 @@
 rm(list = ls())
-pacman::p_load(lme4, sjmisc, sjPlot, tidyverse, lmerTest)
+pacman::p_load(lme4, sjmisc, sjPlot, tidyverse, lmerTest, ordinal)
 data <- readRDS("output/data/data.rds")
 #load("output/data/data.RData")
 
@@ -11,12 +11,15 @@ data$pm_ordinal <- case_when(data$pm_index <= 33.3 ~ "Bajo",
                            TRUE ~ NA_character_)
 
 data$pm_ordinal <- set_label(data$pm_ordinal, "Índice de actitud solidaria hacia el trabajo")
-data$pm_dummy <- ifelse(data$pm_index > mean(data$pm_index, na.rm = T), 1, 
-                        ifelse(data$pm_index <= mean(data$pm_index, na.rm = T), 0, NA))
+data <- data %>% 
+  group_by(country) %>% 
+  mutate(pm_dummy = ifelse(pm_index > mean(pm_index, na.rm = T), 1, 
+                    ifelse(pm_index <= mean(pm_index, na.rm = T), 0, NA))) %>% 
+  ungroup()
 data$pm_dummy <- set_label(data$pm_dummy, "Índice de actitud solidaria hacia el trabajo")
 
 
-# Modelos ----------------------------------------------------------
+# Modelos PM ----------------------------------------------------------
 
 
 # Regresión lineal múltiple -----------------------------------------------
@@ -37,6 +40,7 @@ glm_clase <- glm(pm_dummy ~ clase + have_index + SEX +sector, family = binomial(
 
 # Multinivel --------------------------------------------------------------
 
+#Lineal
 ml_tot <- lmer(pm_index ~ clase + 
                  (plp + densidad + lri + apoyo_nacional|country) + 
                  have_index + SEX + sector, data)
@@ -48,6 +52,21 @@ ml_densidad <- lmer(pm_index ~ clase + have_index + densidad + (1|country), data
 ml_lri <- lmer(pm_index ~ clase + have_index + lri + (1|country), data)
 
 ml_apoyo <- lmer(pm_index ~ clase + have_index + apoyo_nacional + (1|country), data)
+
+#Binaria
+gml_tot <- glmer(pm_dummy ~ clase + 
+                 plp + densidad + lri + apoyo_nacional + (1|country) + 
+                 have_index + SEX + sector, family = binomial, data)
+
+gml_plp <- glmer(pm_dummy ~ clase + have_index + plp + (1|country), family = binomial, data)
+
+gml_densidad <- glmer(pm_dummy ~ clase + have_index + densidad + (1|country), family = binomial, data)
+
+gml_lri <- glmer(pm_dummy ~ clase + have_index + lri + (1|country), family = binomial, data)
+
+gml_apoyo <- glmer(pm_dummy ~ clase + have_index + apoyo_nacional + (1|country), family = binomial, data)
+
+
 
 # Visualización -----------------------------------------------------------
 
@@ -71,7 +90,7 @@ tab_model(list(glm_sim, glm_sc, glm_clase),
           string.intercept = "Intercepto", 
           ci_method = "wald")
 
-# Multinivel --------------------------------------------------------------
+# Multinivel lineal --------------------------------------------------------------
 tab_model(list(ml_plp, ml_densidad, ml_lri, ml_apoyo, ml_tot),
           show.ci = F,
           string.pred = "Predictores",
@@ -79,3 +98,12 @@ tab_model(list(ml_plp, ml_densidad, ml_lri, ml_apoyo, ml_tot),
           string.p = "P-valor",
           string.intercept = "Intercepto")
 
+# Regresión logística binaria multinivel ---------------------------------------------
+
+tab_model(list(gml_plp, gml_densidad, gml_lri, gml_apoyo, gml_tot),
+          show.ci = F,
+          string.pred = "Predictores",
+          string.est = "β",
+          string.p = "P-valor",
+          string.intercept = "Intercepto", 
+          ci_method = "wald")

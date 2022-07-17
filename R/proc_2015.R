@@ -38,7 +38,7 @@ country_codes <- country_codes %>%
 # find_var(issp, "Q12b") #v23 Q12b Apply to R's job: my income is high
 # find_var(issp, "Q12c") #v24 Q12c Apply to R's job: opportunities for advancement are high
 # find_var(issp, "Q12d") #v25 Q12d Apply to R's job: my job is interesting
-# find_var(issp, "Q12e") #v26 Q12e Apply to R's job: can work independently
+ # find_var(issp, "Q12e") #v26 Q12e Apply to R's job: can work independently
 # find_var(issp, "Q12f") #v27 Q12f Apply to R's job: can help other people
 # find_var(issp, "Q12g") #v28 Q12g Apply to R's job: job is useful to society
 
@@ -250,7 +250,7 @@ data <- issp %>%
  ungroup() %>%
  #mutate_at(vars(ends_with("index")), ~(car::recode(., "0 = NA"))) %>% 
  select(-c(EMPREL, ISCO08, WRKSUP, NSUP, propiedad, habilidades, starts_with("pi"), 
-           starts_with("job"), satisfied, proud,
+           job_enjoy, satisfied, proud,
            have_security, have_income, have_advance,
            have_interest, have_indep, have_helpful, have_useful, 
            starts_with("often"), #ends_with("suma"),
@@ -262,11 +262,8 @@ data <- issp %>%
 # Estimar apoyo a nivel nacional ------------------------------------------
 
 apoyo = data %>% 
-  select(1, 2, 4, 5, apoyo_index) %>% 
-  as_survey_design(ids = 1,
-                   weights = exp) %>% 
-  group_by(country) %>% 
-  summarise(apoyo_nacional = survey_mean(apoyo_index, na.rm = T)) %>% 
+  group_by(iso2c) %>% 
+  summarise(apoyo_nacional = mean(apoyo_index, na.rm = T)) %>% 
   ungroup() %>% 
   select(1, 2)
 
@@ -274,7 +271,7 @@ apoyo = data %>%
 # Pegar apoyo nacional a datos micro --------------------------------------
 
 data = merge(data, apoyo, 
-             by = "country",
+             by = "iso2c",
              all = T)
 
 data = merge(data, country_codes, by = "iso2c")
