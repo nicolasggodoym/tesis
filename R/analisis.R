@@ -1,62 +1,81 @@
 rm(list = ls())
 pacman::p_load(lme4, sjmisc, sjPlot, tidyverse, lmerTest)
-final <- readRDS("output/data/data.rds")
+data <- readRDS("output/data/data.rds")
 #load("output/data/data.RData")
 
 #lme4::lmer(dep ~ indep + (1 | 2doNivel), data)
 
+data$pm_ordinal <- case_when(data$pm_index <= 33.3 ~ "Bajo",
+                           data$pm_index > 33.3 & data$pm_index <= 66.6 ~ "Medio",
+                           data$pm_index > 66.6 ~ "Alto",
+                           TRUE ~ NA_character_)
 
-# Cognitivo-instrumental --------------------------------------------------
-
-str <- lmer(strategic_index ~ clase + have_index + plp + densidad + lri +
-              apoyo_nacional + (1|iso2c), final)
-
-summary(str)
-
-str_plp <- lmer(strategic_index ~ clase + have_index + plp + (1|iso2c), final)
-summary(str_plp)
-
-str_densidad <- lmer(strategic_index ~ clase + have_index + densidad + (1|iso2c), final)
-summary(str_densidad)
-
-str_lri <- lmer(strategic_index ~ clase + have_index + lri + (1|iso2c), final)
-summary(str_lri)
-
-str_apoyo <- lmer(strategic_index ~ clase + have_index + apoyo_nacional + (1|iso2c), final)
-summary(str_apoyo)
-
-# Práctico-moral ----------------------------------------------------------
-
-pm <- lmer(pm_index ~ clase + SEX + sector + (plp + densidad + lri +
-                                        apoyo_nacional|iso3c), final)
-
-pm_plp <- lmer(pm_index ~ clase + have_index + plp + (1|iso2c), final)
-summary(pm_plp)
-
-pm_densidad <- lmer(pm_index ~ clase + have_index + densidad + (1|iso2c), final)
-summary(pm_densidad)
-
-pm_lri <- lmer(pm_index ~ clase + have_index + lri + (1|iso2c), final)
-summary(pm_lri)
-
-pm_apoyo <- lmer(pm_index ~ clase + have_index + apoyo_nacional + (1|iso2c), final)
-summary(pm_apoyo)
+data$pm_ordinal <- set_label(data$pm_ordinal, "Índice de actitud solidaria hacia el trabajo")
+data$pm_dummy <- ifelse(data$pm_index > mean(data$pm_index, na.rm = T), 1, 
+                        ifelse(data$pm_index <= mean(data$pm_index, na.rm = T), 0, NA))
+data$pm_dummy <- set_label(data$pm_dummy, "Índice de actitud solidaria hacia el trabajo")
 
 
-# Estético-expresiva ------------------------------------------------------
+# Modelos ----------------------------------------------------------
 
-expr <- lmer(expr_index ~ clase + have_index + plp + densidad + lri +
-                    apoyo_nacional + (1|iso2c), final)
-summary(expr)
 
-expr_plp <- lmer(expr_index ~ clase + have_index + plp + (1|iso2c), final)
-summary(pm_plp)
+# Regresión lineal múltiple -----------------------------------------------
 
-expr_densidad <- lmer(expr_index ~ clase + have_index + densidad + (1|iso2c), final)
-summary(pm_densidad)
+lm_sim <- lm(pm_index ~ clase, data)
 
-expr_lri <- lmer(expr_index ~ clase + have_index + lri + (1|iso2c), final)
-summary(pm_lri)
+lm_sc <- lm(pm_index ~ clase + have_index, data)
 
-expr_apoyo <- lmer(expr_index ~ clase + have_index + apoyo_nacional + (1|iso2c), final)
-summary(pm_apoyo)
+lm_clase <- lm(pm_index ~ clase + have_index + SEX +sector, data)
+
+# Regresión logística binaria -----------------------------------------------
+
+glm_sim <- glm(pm_dummy ~ clase, family = binomial(link = "logit"), data)
+
+glm_sc <- glm(pm_dummy ~ clase + have_index, family = binomial(link = "logit"), data)
+
+glm_clase <- glm(pm_dummy ~ clase + have_index + SEX +sector, family = binomial(link = "logit"), data)
+
+# Multinivel --------------------------------------------------------------
+
+ml_tot <- lmer(pm_index ~ clase + 
+                 (plp + densidad + lri + apoyo_nacional|country) + 
+                 have_index + SEX + sector, data)
+
+ml_plp <- lmer(pm_index ~ clase + have_index + plp + (1|country), data)
+
+ml_densidad <- lmer(pm_index ~ clase + have_index + densidad + (1|country), data)
+
+ml_lri <- lmer(pm_index ~ clase + have_index + lri + (1|country), data)
+
+ml_apoyo <- lmer(pm_index ~ clase + have_index + apoyo_nacional + (1|country), data)
+
+# Visualización -----------------------------------------------------------
+
+
+# Regresión lineal múltiple -----------------------------------------------
+tab_model(list(lm_sim, lm_sc, lm_clase),
+          show.ci = F,
+          string.pred = "Predictores",
+          string.est = "β",
+          string.p = "P-valor",
+          string.intercept = "Intercepto")
+
+
+# Regresión logística binaria ---------------------------------------------
+
+tab_model(list(glm_sim, glm_sc, glm_clase),
+          show.ci = F,
+          string.pred = "Predictores",
+          string.est = "β",
+          string.p = "P-valor",
+          string.intercept = "Intercepto", 
+          ci_method = "wald")
+
+# Multinivel --------------------------------------------------------------
+tab_model(list(ml_plp, ml_densidad, ml_lri, ml_apoyo, ml_tot),
+          show.ci = F,
+          string.pred = "Predictores",
+          string.est = "β",
+          string.p = "P-valor",
+          string.intercept = "Intercepto")
+
