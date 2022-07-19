@@ -5,10 +5,12 @@ data <- readRDS("output/data/data.rds")
 
 #lme4::lmer(dep ~ indep + (1 | 2doNivel), data)
 
-data$pm_ordinal <- case_when(data$pm_index <= 33.3 ~ "Bajo",
-                           data$pm_index > 33.3 & data$pm_index <= 66.6 ~ "Medio",
-                           data$pm_index > 66.6 ~ "Alto",
-                           TRUE ~ NA_character_)
+data$pm_ordinal <- car::recode(data$pm_suma, 
+                               c("c(0,1) = 0;
+                                 c(2,3) = 1;
+                                 c(4,5) = 2;
+                                 c(6,7) = 3;
+                                 8 = 4"))
 
 data$pm_ordinal <- set_label(data$pm_ordinal, "Índice de actitud solidaria hacia el trabajo")
 data <- data %>% 
