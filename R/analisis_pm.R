@@ -26,47 +26,47 @@ data$pm_dummy <- set_label(data$pm_dummy, "Índice de actitud solidaria hacia el
 
 # Regresión lineal múltiple -----------------------------------------------
 
-lm_sim <- lm(pm_index ~ clase, data)
+lm_sim_pm <- lm(pm_index ~ clase, data)
 
-lm_sc <- lm(pm_index ~ clase + have_index, data)
+lm_sc_pm <- lm(pm_index ~ clase + have_index, data)
 
-lm_clase <- lm(pm_index ~ clase + have_index + SEX +sector, data)
+lm_clase_pm <- lm(pm_index ~ clase + have_index + SEX +sector, data)
 
 # Regresión logística binaria -----------------------------------------------
 
-glm_sim <- glm(pm_dummy ~ clase, family = binomial(link = "logit"), data)
+glm_sim_pm <- glm(pm_dummy ~ clase, family = binomial(link = "logit"), data)
 
-glm_sc <- glm(pm_dummy ~ clase + have_index, family = binomial(link = "logit"), data)
+glm_sc_pm <- glm(pm_dummy ~ clase + have_index, family = binomial(link = "logit"), data)
 
-glm_clase <- glm(pm_dummy ~ clase + have_index + SEX +sector, family = binomial(link = "logit"), data)
+glm_clase_pm <- glm(pm_dummy ~ clase + have_index + SEX +sector, family = binomial(link = "logit"), data)
 
 # Multinivel --------------------------------------------------------------
 
 #Lineal
-ml_tot <- lmer(pm_index ~ clase + 
+ml_tot_pm <- lmer(pm_index ~ clase + 
                  (plp + densidad + lri + apoyo_nacional|country) + 
                  have_index + SEX + sector, data)
 
-ml_plp <- lmer(pm_index ~ clase + have_index + plp + (1|country), data)
+ml_plp_pm <- lmer(pm_index ~ clase + have_index + plp + (1|country), data)
 
-ml_densidad <- lmer(pm_index ~ clase + have_index + densidad + (1|country), data)
+ml_densidad_pm <- lmer(pm_index ~ clase + have_index + densidad + (1|country), data)
 
-ml_lri <- lmer(pm_index ~ clase + have_index + lri + (1|country), data)
+ml_lri_pm <- lmer(pm_index ~ clase + have_index + lri + (1|country), data)
 
-ml_apoyo <- lmer(pm_index ~ clase + have_index + apoyo_nacional + (1|country), data)
+ml_apoyo_pm <- lmer(pm_index ~ clase + have_index + apoyo_nacional + (1|country), data)
 
 #Binaria
-gml_tot <- glmer(pm_dummy ~ clase + 
+gml_tot_pm <- glmer(pm_dummy ~ clase + 
                  plp + densidad + lri + apoyo_nacional + (1|country) + 
                  have_index + SEX + sector, family = binomial, data)
 
-gml_plp <- glmer(pm_dummy ~ clase + have_index + plp + (1|country), family = binomial, data)
+gml_plp_pm <- glmer(pm_dummy ~ clase + have_index + plp + (1|country), family = binomial, data)
 
-gml_densidad <- glmer(pm_dummy ~ clase + have_index + densidad + (1|country), family = binomial, data)
+gml_densidad_pm <- glmer(pm_dummy ~ clase + have_index + densidad + (1|country), family = binomial, data)
 
-gml_lri <- glmer(pm_dummy ~ clase + have_index + lri + (1|country), family = binomial, data)
+gml_lri_pm <- glmer(pm_dummy ~ clase + have_index + lri + (1|country), family = binomial, data)
 
-gml_apoyo <- glmer(pm_dummy ~ clase + have_index + apoyo_nacional + (1|country), family = binomial, data)
+gml_apoyo_pm <- glmer(pm_dummy ~ clase + have_index + apoyo_nacional + (1|country), family = binomial, data)
 
 
 
@@ -74,7 +74,7 @@ gml_apoyo <- glmer(pm_dummy ~ clase + have_index + apoyo_nacional + (1|country),
 
 
 # Regresión lineal múltiple -----------------------------------------------
-tab_model(list(lm_sim, lm_sc, lm_clase),
+tab_model(list(lm_sim_pm, lm_sc_pm, lm_clase_pm),
           show.ci = F,
           string.pred = "Predictores",
           string.est = "β",
@@ -84,7 +84,7 @@ tab_model(list(lm_sim, lm_sc, lm_clase),
 
 # Regresión logística binaria ---------------------------------------------
 
-tab_model(list(glm_sim, glm_sc, glm_clase),
+tab_model(list(glm_sim_pm, glm_sc_pm, glm_clase_pm),
           show.ci = F,
           string.pred = "Predictores",
           string.est = "β",
@@ -93,7 +93,7 @@ tab_model(list(glm_sim, glm_sc, glm_clase),
           ci_method = "wald")
 
 # Multinivel lineal --------------------------------------------------------------
-tab_model(list(ml_plp, ml_densidad, ml_lri, ml_apoyo, ml_tot),
+tab_model(list(ml_plp_pm, ml_densidad_pm, ml_lri_pm, ml_apoyo_pm, ml_tot_pm),
           show.ci = F,
           string.pred = "Predictores",
           string.est = "β",
@@ -102,7 +102,7 @@ tab_model(list(ml_plp, ml_densidad, ml_lri, ml_apoyo, ml_tot),
 
 # Regresión logística binaria multinivel ---------------------------------------------
 
-tab_model(list(gml_plp, gml_densidad, gml_lri, gml_apoyo, gml_tot),
+tab_model(list(gml_plp_pm, gml_densidad_pm, gml_lri_pm, gml_apoyo_pm, gml_tot_pm),
           show.ci = F,
           string.pred = "Predictores",
           string.est = "β",

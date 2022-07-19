@@ -157,11 +157,17 @@ data <- issp %>%
                                             5 = 0")))) %>% 
   mutate(country = str_sub(.$country, start = 4, -1), 
          job_money = car::recode(.$job_money, 
-                                 recodes = c("1 = 0;
-                                             2 = 1;
-                                             3 = 2;
-                                             4 = 3;
-                                             5 = 4")),
+                                 recodes = c("1 = 'Muy de acuerdo';
+                                             2 = 'De acuerdo';
+                                             3 = 'Ni de acuerdo ni en desacuerdo';
+                                             4 = 'En desacuerdo';
+                                             5 = 'Muy en desacuerdo'"),
+                                 as.factor = T,
+                                 levels = c('Muy de acuerdo',
+                                            'De acuerdo',
+                                            'Ni de acuerdo ni en desacuerdo',
+                                            'En desacuerdo',
+                                            'Muy en desacuerdo')),
          union_bad = car::recode(.$union_bad, 
                                  recodes = c("1 = 0;
                                              2 = 1;
@@ -228,7 +234,7 @@ data <- issp %>%
                                    'Capitalista')),
         expresiva = ifelse(have_interest > 2, 1, 0)) %>%
  rowwise() %>%
- mutate(strategic_suma = sum(job_money, job_enjoy, na.rm = T),
+ mutate(#strategic_suma = sum(job_money, job_enjoy, na.rm = T),
        have_suma = sum(have_security, have_income, have_advance, have_interest, have_indep, have_helpful, have_useful, na.rm = T),
        lack_security = have_security - pi_security,
        lack_income = have_income - pi_income,
@@ -241,7 +247,7 @@ data <- issp %>%
        pm_suma = sum(pi_useful, pi_helpful, na.rm = T),
        expr_suma = sum(pi_interest, pi_indep, pi_decide, pi_contact, na.rm = T),
        apoyo_suma = sum(union_need, union_bad, na.rm = T)) %>%
-  mutate(strategic_index = (strategic_suma/max(.$strategic_suma) * 100),
+  mutate(#strategic_index = (strategic_suma/max(.$strategic_suma) * 100),
         have_index = (have_suma/max(.$have_suma) * 100),
         lack_index = (lack_suma/max(.$lack_suma) * -100),
         pm_index = (pm_suma/max(.$pm_suma) * 100),
@@ -280,37 +286,6 @@ data = data %>% select(-c(iso2c, country))
 
 rm(issp, apoyo, country_codes)
 
-# Variables indices
-## Employment commitment
-### job_money
-### job_enjoy
-
-## Have index
-
-### have_security
-### have_income
-### have_advance
-### have_interest
-### have_indep
-### have_helpful
-### have_useful
-
-## Lack index
-
-### pi_security
-### pi_income
-### pi_advance
-### pi_interest
-### pi_indep
-### pi_helpful
-### have_useful
-
-## Sobreexigencia
-
-### often_phys
-### often_stress
-### often_home
-### often_weekend
 
 # Alfa ordinal
 
@@ -358,22 +333,4 @@ rm(issp, apoyo, country_codes)
 
 # Resultado: sólo nos quedamos con un factor (pm)
 
-# Recodificación en ordinal
-
-# data <- data %>% 
-#   mutate_at(vars(strategic_suma, pm_suma, expr_suma), ~(car::recode(., c("c(0,1,2) = 0;
-#                                                           c(3,4,5) = 1;
-#                                                           c(6,7,8) = 2"))))
-# data$strategic_suma <- car::recode(data$strategic_suma, c("c(0,1,2) = 0;
-#                                                           c(3,4,5) = 1;
-#                                                           c(6,7,8) = 2"))
-# 
-# library(MASS)
-# x <- polr(as_factor(strategic_suma) ~ clase + SEX + AGE + have_index, data)
-# y <- polr(as_factor(pm_suma) ~ clase + SEX + AGE + have_index, data)
-# z <- polr(as_factor(expr_suma) ~ clase + SEX + AGE + have_index, data)
-# 
-# a <- lm(strategic_suma ~ clase + SEX + AGE + have_index, data)
-# b <- lm(pm_suma ~ clase + SEX + AGE + have_index, data)
-# c <- lm(expr_suma ~ clase + SEX + AGE + have_index, data)
 
