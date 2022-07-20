@@ -104,9 +104,9 @@ ctry_lvl <- merge(ctry_lvl, imp_tud, by = c("iso3c", "year", "densidad"), all = 
 
 ctry_lvl = ctry_lvl %>% 
   mutate_at(vars(plp, densidad, lri, nni_pc), 
-            ~(ifelse(is.na(.) & lag(iso3c) == iso3c, na.locf(.), 
-                ifelse(is.na(.) & lead(iso3c) == iso3c,
-                       na.locf(., fromLast = T),
+            ~(ifelse(is.na(.) & lead(iso3c) == iso3c, na.locf(., fromLast = T), 
+                ifelse(is.na(.) & lag(iso3c) == iso3c,
+                       na.locf(.),
                        .)))) %>% 
   filter(year == 2015 & iso3c != "PHL") %>% 
   select(-year)

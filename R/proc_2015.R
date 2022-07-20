@@ -157,17 +157,11 @@ data <- issp %>%
                                             5 = 0")))) %>% 
   mutate(country = str_sub(.$country, start = 4, -1), 
          job_money = car::recode(.$job_money, 
-                                 recodes = c("1 = 'Muy de acuerdo';
-                                             2 = 'De acuerdo';
-                                             3 = 'Ni de acuerdo ni en desacuerdo';
-                                             4 = 'En desacuerdo';
-                                             5 = 'Muy en desacuerdo'"),
-                                 as.factor = T,
-                                 levels = c('Muy de acuerdo',
-                                            'De acuerdo',
-                                            'Ni de acuerdo ni en desacuerdo',
-                                            'En desacuerdo',
-                                            'Muy en desacuerdo')),
+                                 recodes = c("1 = 0;
+                                             2 = 1;
+                                             3 = 2;
+                                             4 = 3;
+                                             5 = 4")),
          union_bad = car::recode(.$union_bad, 
                                  recodes = c("1 = 0;
                                              2 = 1;
@@ -231,39 +225,19 @@ data <- issp %>%
                                    'Experto directivo/supervisor',
                                    'Pequeña burguesia',
                                    'Pequeño empleador',
-                                   'Capitalista')),
-        expresiva = ifelse(have_interest > 2, 1, 0)) %>%
- rowwise() %>%
- mutate(#strategic_suma = sum(job_money, job_enjoy, na.rm = T),
-       have_suma = sum(have_security, have_income, have_advance, have_interest, have_indep, have_helpful, have_useful, na.rm = T),
-       lack_security = have_security - pi_security,
-       lack_income = have_income - pi_income,
-       lack_advance = have_advance - pi_advance,
-       lack_interest = have_interest - pi_interest,
-       lack_indep = have_indep - pi_indep,
-       lack_helpful = have_helpful - pi_helpful,
-       lack_useful = have_useful - pi_useful,
-       lack_suma = sum(lack_security, lack_income, lack_advance, lack_interest, lack_indep, lack_helpful, lack_useful, na.rm = T),
-       pm_suma = sum(pi_useful, pi_helpful, na.rm = T),
-       expr_suma = sum(pi_interest, pi_indep, pi_decide, pi_contact, na.rm = T),
-       apoyo_suma = sum(union_need, union_bad, na.rm = T)) %>%
-  mutate(#strategic_index = (strategic_suma/max(.$strategic_suma) * 100),
-        have_index = (have_suma/max(.$have_suma) * 100),
-        lack_index = (lack_suma/max(.$lack_suma) * -100),
-        pm_index = (pm_suma/max(.$pm_suma) * 100),
-        expr_index = (expr_suma/max(.$expr_suma) * 100),
-        apoyo_index = (apoyo_suma/max(.$expr_suma) * 100)) %>%
- ungroup() %>%
- #mutate_at(vars(ends_with("index")), ~(car::recode(., "0 = NA"))) %>% 
- select(-c(EMPREL, ISCO08, WRKSUP, NSUP, propiedad, habilidades, starts_with("pi"), 
-           job_enjoy, satisfied, proud,
-           have_security, have_income, have_advance,
-           have_interest, have_indep, have_helpful, have_useful, 
-           starts_with("often"), #ends_with("suma"),
-           lack_security, lack_income, lack_advance, lack_interest, lack_indep,
-           lack_helpful, lack_useful))
- 
+                                   'Capitalista'))) 
 
+data <- data %>%
+ rowwise() %>%
+ mutate(have_suma = sum(have_security, have_income, have_advance, have_interest, have_indep, have_helpful, have_useful, na.rm = T),
+       pm_suma = sum(pi_useful, pi_helpful, na.rm = T),
+       apoyo_suma = sum(union_need, union_bad, na.rm = T)) %>%
+  mutate(have_index = (have_suma/max(.$have_suma) * 100),
+        #pm_index = pm_suma/2,
+        apoyo_index = (apoyo_suma/max(.$apoyo_suma) * 100)) %>%
+ ungroup() %>%
+ select(country, iso2c, job_money, pm_suma, clase, have_index, apoyo_index, SEX)
+ 
 
 # Estimar apoyo a nivel nacional ------------------------------------------
 
@@ -282,7 +256,7 @@ data = merge(data, apoyo,
 
 data = merge(data, country_codes, by = "iso2c")
 
-data = data %>% select(-c(iso2c, country))
+data = data %>% select(-c(iso2c, country, apoyo_index))
 
 rm(issp, apoyo, country_codes)
 

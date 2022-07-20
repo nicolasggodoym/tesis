@@ -7,12 +7,12 @@ pacman::p_load(tidyverse,
                ggplot2, 
                sjmisc,
                sjPlot,
-               kableExtra)
+               kableExtra,
+               webshot)
 
 # Cargar datos ------------------------------------------------------------
 
 data <- readRDS("output/data/data.rds")
-
 
 # Análisis ----------------------------------------------------------------
 
@@ -32,6 +32,7 @@ data %>%
                 html_font = "Times New Roman") %>% 
   footnote("Elaboración propia",
            general_title = "Fuente :")
+webshot("output/fig/country_distr.html", "output/fig/country_distr.png")
 
 
 # Distribución dependiente ------------------------------------------------
@@ -48,11 +49,13 @@ data %>%
   mutate(raw.prc = paste(.$raw.prc, "%")) %>% #Incorporamos porcentaje con paste()
   kable(caption = "Distribución de la variable clase social",
         format = "html",
-        col.names = c("País", "Frecuencia absoluta", "Frecuencia relativa")) %>% 
+        col.names = c("Posición de clase", "Frecuencia absoluta", "Frecuencia relativa")) %>% 
   kable_classic(full_width = F,
                 html_font = "Times New Roman") %>% 
   footnote("Elaboración propia",
            general_title = "Fuente :")
+webshot("output/fig/clase_frq.html", "output/fig/clase_frq.png")
+
 
 # Distribución variables macro --------------------------------------------
 data %>% 
@@ -72,11 +75,15 @@ data %>%
                 html_font = "Times New Roman") %>% 
   footnote("Elaboración propia",
            general_title = "Fuente :")
+webshot("output/fig/country_summary.html", "output/fig/country_summary.png")
+
 
 # Dependiente x clase social ----------------------------------------------
+
+#PM
 data %>% 
   group_by(clase) %>%
-  summarise(pm = round(mean(pm_index, na.rm = T),3)) %>% 
+  summarise(pm = round(mean(pm_suma, na.rm = T),3)) %>% 
   ungroup() %>% #Transformamos en dataframe para manipular con dplyr
   filter(!is.na(clase)) %>% 
   kable(caption = "Media de Índice de actitud solidaria hacia el trabajo según clase social",
@@ -86,7 +93,22 @@ data %>%
                 html_font = "Times New Roman") %>% 
   footnote("Elaboración propia",
            general_title = "Fuente :")
+webshot("output/fig/clase_pm.html", "output/fig/clase_pm.png")
 
-# Distribución variables control ------------------------------------------
+
+#CI
+data %>% 
+  group_by(clase) %>%
+  summarise(ci = round(mean(job_money, na.rm = T),3)) %>% 
+  ungroup() %>% 
+  kable(caption = "Media de Índice de actitud mercantilizada hacia el trabajo según clase social",
+        format = "html",
+        col.names = c("Posición de clase", 
+                      "Media de actitud mercantilizada hacia el trabajo")) %>% 
+  kable_classic(full_width = F,
+                html_font = "Times New Roman") %>% 
+  footnote("Elaboración propia",
+           general_title = "Fuente :")
+webshot("output/fig/clase_ci.html", "output/fig/clase_ci.png")
 
 
