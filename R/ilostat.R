@@ -30,16 +30,17 @@ ft_s_ed <- ft_s_ed %>%
   pivot_wider(id_cols = c(1,2),
               names_from = ed,
               values_from = ft_tot) %>% 
-  select(1:8) 
+  select(1:8) %>% 
+  filter(year %in% c(2012:2018))
 
 ft_s_ed <- ft_s_ed[
   with(ft_s_ed, order(iso3c, year)),
 ]
 
-ft_s_ed = ft_s_ed %>% 
+ft_s_ed = ft_s_ed %>%
   mutate_at(vars(EDU_AGGREGATE_TOTAL, EDU_AGGREGATE_LTB, EDU_AGGREGATE_BAS,
                  EDU_AGGREGATE_INT, EDU_AGGREGATE_ADV, EDU_AGGREGATE_X),
-            ~(ifelse(is.na(.) & lead(iso3c) == iso3c, na.locf(., fromLast = T), 
+            ~(ifelse(is.na(.) & lead(iso3c) == iso3c, na.locf(., fromLast = T),
                      ifelse(is.na(.) & lag(iso3c) == iso3c,
                               na.locf(.),
                             .))))
@@ -53,14 +54,15 @@ unemp <- read.csv("input/data/UNE_DEAP_SEX_AGE_EDU_RT_A.csv")
 unemp <- unemp %>% 
   filter(sex == "SEX_T",
          classif1 == "AGE_AGGREGATE_TOTAL") %>% 
-  select(iso3c = 1,
+  select(iso3c = 2,
          year = time,
          ed = classif2,
          unemp_tot = 8) %>% 
   pivot_wider(id_cols = c(1,2),
               names_from = ed,
               values_from = unemp_tot) %>% 
-  select(1:8) 
+  select(1:8) %>% 
+  filter(year %in% c(2012:2018))
 
 unemp <- unemp[
   with(unemp, order(iso3c, year)),
@@ -73,7 +75,7 @@ unemp <- unemp %>%
             ~((100 - .)/100)) %>% 
   mutate_at(vars(EDU_AGGREGATE_TOTAL, EDU_AGGREGATE_LTB, EDU_AGGREGATE_BAS,
                  EDU_AGGREGATE_INT, EDU_AGGREGATE_ADV, EDU_AGGREGATE_X),
-            ~(ifelse(is.na(.) & lead(iso3c) == iso3c, na.locf(., fromLast = T), 
+            ~(ifelse(is.na(.) & lead(iso3c) == iso3c, na.locf(., fromLast = T),
                      ifelse(is.na(.) & lag(iso3c) == iso3c,
                             na.locf(.),
                             .))))
@@ -99,7 +101,7 @@ plp = plp %>%
   mutate(plp_razon = ocupados_adv / (ocupados_ltb + ocupados_bas + 
                                        ocupados_int + ocupados_x),
          inv_unemp = 1/unemp_per) %>% 
-  mutate(plp = plp_razon + inv_unemp) %>% 
+  mutate(plp = plp_razon * inv_unemp) %>% 
   ungroup() %>% 
   select(1,2, plp)
   

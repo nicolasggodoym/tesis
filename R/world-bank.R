@@ -14,13 +14,13 @@ wb <- read.csv("input/data/world_bank.csv", na.strings = "..")
 # Procesar ----------------------------------------------------------------
 
 wb <- wb %>% 
-  select(4, 7:15) %>% 
-  pivot_longer(cols = -1,
-               names_to = "year",
-               values_to = "nni_pc") %>% 
-  mutate(year = as.numeric(str_sub(.$year, start = 10, end = 13))) %>% 
-  rename(iso3c = 1)
-
-
+  filter(time %in% c(2013:2018) & 
+           classif1 == "AGE_AGGREGATE_TOTAL" &
+           classif2 == "EDU_AGGREGATE_TOTAL") %>% 
+  select(iso3c = 1, 5, 6, year = 7, 8) %>% 
+  group_by(iso3c, year) %>% 
+  summarise(obs_value = first(obs_value)) %>% 
+  ungroup() %>% 
+  rename(pib_pc = obs_value)
 
 

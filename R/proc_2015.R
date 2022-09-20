@@ -8,10 +8,7 @@ pacman::p_load(tidyverse,
                stringr,
                haven,
                dplyr,
-               car, 
-               remotes,
-               survey, 
-               srvyr)
+               car)
 
 #Para alfa ordinal
 #remotes::install_github("jogrue/jogRu", force = T)
@@ -23,10 +20,11 @@ issp <- read_dta("input/data/issp_2015.dta")
 country_codes <- readRDS("output/data/country-codes.rds")
 
 country_codes <- country_codes %>% 
-  filter(iso2c %in% c("AT", "AU", "BE", "CH", "CL", "CN", "CZ", "DE", "DK", "EE",
-                      "ES", "FI", "FR", "GB", "GE", "HR", "HU", "IL", "IN",
-                      "IS", "JP", "LT", "LV", "MX", "NO", "NZ", "PH", "PL", "RU",
-                      "SE", "SI", "SK", "SR", "TW", "US", "VE", "ZA")) %>% 
+  filter(iso2c %in% c("AT", "AU", "BE", "CH", "CL", "CZ", 
+                      "DE", "DK", "EE",
+                      "ES", "FI", "FR", "GB", "HU", "IS", 
+                      "LT", "LV", "MX", "NO", "PL", "RU",
+                      "SE", "SI", "SK", "US", "ZA")) %>% 
   select(-c(numeric, country))
 
 # 3. Explorar -------------------------------------------------------------
@@ -42,24 +40,9 @@ country_codes <- country_codes %>%
 # find_var(issp, "Q12f") #v27 Q12f Apply to R's job: can help other people
 # find_var(issp, "Q12g") #v28 Q12g Apply to R's job: job is useful to society
 
-# Lack index
-# find_var(issp, "Q2a") #v3 Q2a Personally important: job security
-# find_var(issp, "Q2b") #v4 Q2b Personally important: high income
-# find_var(issp, "Q2c") #v5 Q2c Personally important: opportunities for advancement
-# find_var(issp, "Q2d") #v6 Q2d Personally important: an interesting job
-# find_var(issp, "Q2e") #v7 Q2e Personally important: work independently
-# find_var(issp, "Q2f") #v8 Q2f Personally important: help other people
-# find_var(issp, "Q2g") #v9 Q2g Personally important: a job useful to society
-
 # Valoración no-mercantil del trabajo remunerado
 # find_var(issp, "Q1a") #v1 Q1a Job is a way of earning money - no more
 # find_var(issp, "Q1b") #v2 Q1b Enjoy a paid job even if I did not need money
-
-# Índice de sobreexigencia laboral
-# find_var(issp, "Q13a") #v30 Q13a How often applies: Do hard physical work
-# find_var(issp, "Q13b") #v31 Q13b How often applies: find work stressful
-# find_var(issp, "Q14a") #v32 Q14a And how often applies: work at home during working hours
-# find_var(issp, "Q14b") #v33 Q14b And how often applies: involve working on weekends
 
 # Variables predictoras (clase social y control)
 # find_var(issp, "EMP") #EMPREL Employment relationship
@@ -162,6 +145,9 @@ data <- issp %>%
                                              3 = 2;
                                              4 = 3;
                                              5 = 4")),
+         union_need = factor(ifelse(union_need %in% c(0:2), "Desacuerdo",
+                                    ifelse(union_need %in% c(3,4), "De acuerdo", NA)),
+                             levels = c("Desacuerdo", "De acuerdo")),
          union_bad = car::recode(.$union_bad, 
                                  recodes = c("1 = 0;
                                              2 = 1;
@@ -207,8 +193,7 @@ data <- issp %>%
                                    99=NA"),
          
 ### c) Construcción de la variable clase social (clase) ---------------------
-         clase = factor(case_when(propiedad == 'Propietario' & NEMPLOY == "Más de 50 empleados" ~ 'Capitalista',
-                                  (propiedad == 'Propietario' | propiedad == 'Propietario de negocio familiar') & NEMPLOY == "3 a 49 empleados" ~ 'Pequeño empleador',
+         clase = factor(case_when(propiedad %in% c('Propietario', 'Propietario de negocio familiar') & NEMPLOY %in% c("3 a 49 empleados", "Más de 50 empleados") ~ 'Capitalista',
                                   propiedad == 'Pequeña burguesia' | ((propiedad == 'Propietario' | propiedad == 'Propietario de negocio familiar') & NEMPLOY == "1 o 2 empleados") ~ 'Pequeña burguesia',
                                   propiedad == 'No propietario' & WRKSUP == 1 & habilidades == 'Experto' ~ 'Experto directivo/supervisor',
                                   propiedad == 'No propietario' & WRKSUP == 1 & habilidades == 'Calificado' ~ 'Directivo/supervisor semi-credencializado',
@@ -224,41 +209,47 @@ data <- issp %>%
                                    'Directivo/supervisor semi-credencializado', 
                                    'Experto directivo/supervisor',
                                    'Pequeña burguesia',
-                                   'Pequeño empleador',
                                    'Capitalista'))) 
 
 data <- data %>%
  rowwise() %>%
  mutate(have_suma = sum(have_security, have_income, have_advance, have_interest, have_indep, have_helpful, have_useful, na.rm = T),
-       pm_suma = sum(pi_useful, pi_helpful, na.rm = T),
-       apoyo_suma = sum(union_need, union_bad, na.rm = T)) %>%
-  mutate(have_index = (have_suma/max(.$have_suma) * 100),
-        #pm_index = pm_suma/2,
-        apoyo_index = (apoyo_suma/max(.$apoyo_suma) * 100)) %>%
+       pm_suma = sum(pi_useful, pi_helpful, na.rm = T)) %>%
+  mutate(have_index = (have_suma/max(.$have_suma) * 100)) %>%
  ungroup() %>%
- select(country, iso2c, job_money, pm_suma, clase, have_index, apoyo_index, SEX)
+ select(country, iso2c, 
+        job_money, pm_suma, 
+        clase, have_index, 
+        UNION, SEX)
  
 
 # Estimar apoyo a nivel nacional ------------------------------------------
 
-apoyo = data %>% 
-  group_by(iso2c) %>% 
-  summarise(apoyo_nacional = mean(apoyo_index, na.rm = T)) %>% 
-  ungroup() %>% 
-  select(1, 2)
+# apoyo = data %>% 
+#   mutate(union_mean = mean(union_need, na.rm = T),
+#          union_sd = sd(union_need, na.rm = T)) %>% 
+#   group_by(iso2c) %>% 
+#   mutate(mean_nacional = mean(union_need, na.rm = T)) %>% 
+#   ungroup() %>% 
+#   rowwise() %>% 
+#   mutate(apoyo_nacional = (mean_nacional - union_mean)/union_sd) %>%
+#   ungroup() %>% 
+#   select(2, 12) %>% 
+#   distinct()
 
 
 # Pegar apoyo nacional a datos micro --------------------------------------
 
-data = merge(data, apoyo, 
-             by = "iso2c",
-             all = T)
+# data = merge(data, apoyo, 
+#              by = "iso2c",
+#              all = T)
 
 data = merge(data, country_codes, by = "iso2c")
 
-data = data %>% select(-c(iso2c, country, apoyo_index))
+data = data %>% select(-c(iso2c, country))
 
-rm(issp, apoyo, country_codes)
+rm(issp, #apoyo, 
+   country_codes) 
 
 
 # Alfa ordinal

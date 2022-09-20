@@ -37,10 +37,11 @@ source("R/world-bank.R")
 ### Filtrar países de interés -----------------------------------------------
 
 country_codes <- country_codes %>% 
-  filter(iso2c %in% c("AT", "AU", "BE", "CH", "CL", "CN", "CZ", "DE", "DK", "EE",
-                      "ES", "FI", "FR", "GB", "GE", "HR", "HU", "IL", "IN",
-                      "IS", "JP", "LT", "LV", "MX", "NO", "NZ", "PH", "PL", "RU",
-                      "SE", "SI", "SK", "SR", "TW", "US", "VE", "ZA")) %>% 
+  filter(iso2c %in% c(c("AT", "AU", "BE", "CH", "CL", "CZ", 
+                        "DE", "DK", "EE",
+                        "ES", "FI", "FR", "GB", "HU", "IS", 
+                        "LT", "LV", "MX", "NO", "PL", "RU",
+                        "SE", "SI", "SK", "US", "ZA"))) %>% 
   select(-numeric, - country)
 
 #### Crear vectores para filtrado
@@ -52,10 +53,10 @@ v_country = country_codes$country
 # ILO-STAT ----------------------------------------------------------------
 
 tud <- tud %>% 
-  filter(iso3c %in% c(v_iso3c) & (year > 2010 & year < 2018))
+  filter(iso3c %in% c(v_iso3c))
 
 plp <- plp %>% 
-  filter(iso3c %in% c(v_iso3c) & (year > 2010 & year < 2018))
+  filter(iso3c %in% c(v_iso3c))
 
 # DPI ---------------------------------------------------------------------
 
@@ -65,14 +66,16 @@ plp <- plp %>%
 # LRI ---------------------------------------------------------------------
 
 lri <- lri %>% 
-  filter(iso3c %in% c(v_iso3c) & (year > 2010 & year < 2018))
+  filter(iso3c %in% c(v_iso3c) & (year > 2012 & year < 2018))
 
 
 # World Bank --------------------------------------------------------------
 
 wb <- wb %>% 
-  filter(iso3c %in% c(v_iso3c) & (year > 2010 & year < 2018))
+  filter(iso3c %in% c(v_iso3c) & (year > 2012 & year < 2018))
 
+
+# Imputar -----------------------------------------------------------------
 
 imp <- data.frame(iso3c = v_iso3c, year = 2015, plp = NA, densidad = NA, lri = NA)
 
@@ -97,19 +100,31 @@ ctry_lvl <- list(lri, plp, tud, wb) %>%
 
 ctry_lvl <- merge(ctry_lvl, imp_tud, by = c("iso3c", "year", "densidad"), all = T)
 
-#ctry_lvl <- merge(ctry_lvl, imp_plp, by = c("iso3c", "year", "plp"), all = T)
-
+ctry_lvl <- merge(ctry_lvl, imp_plp, by = c("iso3c", "year", "plp"), all = T)
 
 # Imputar valores NA 2015 -------------------------------------------------
 
 ctry_lvl = ctry_lvl %>% 
-  mutate_at(vars(plp, densidad, lri, nni_pc), 
+  mutate_at(vars(plp, densidad, lri, pib_pc), 
             ~(ifelse(is.na(.) & lead(iso3c) == iso3c, na.locf(., fromLast = T), 
                 ifelse(is.na(.) & lag(iso3c) == iso3c,
                        na.locf(.),
                        .)))) %>% 
-  filter(year == 2015 & iso3c != "PHL") %>% 
-  select(-year)
+  filter(year == 2015) %>% 
+  select(-year) %>% 
+  mutate(mean_d = mean(densidad, na.rm =T),
+         sd_d = sd(densidad, na.rm =T),
+         mean_lri = mean(lri, na.rm =T),
+         sd_lri = sd(lri, na.rm =T),
+         mean_plp = mean(plp, na.rm =T),
+         sd_plp = sd(plp, na.rm =T),
+         mean_pibpc = mean(pib_pc, na.rm =T),
+         sd_pibpc = sd(pib_pc, na.rm =T)) %>% 
+  mutate(densidad = (densidad - mean_d)/sd_d,
+         lri = -1*(lri - mean_lri)/sd_lri,
+         plp = (plp - mean_plp)/sd_plp,
+         pib_pc = (pib_pc - mean_pibpc)/sd_pibpc) %>% 
+    select(-c(starts_with("mean"), starts_with("sd")))
 
 #dpi <- merge(country_codes, dpi, by = "country") %>% select(-country)
 

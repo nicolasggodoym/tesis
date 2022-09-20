@@ -12,7 +12,7 @@ source("R/proc_ctry_lvl.R")
 # Unificar datos ----------------------------------------------------------
 final <- merge(data, ctry_lvl, by = "iso3c", all.x = T)
 
-final <- filter(final, !is.na(id) & iso3c != "PHL")
+final <- filter(final, !is.na(id) & iso3c != "PHL") 
 
 #final_dpi <- merge(data, ctry_lvl_dpi, by = "iso2c") %>% 
 #  select(-c(country.x, country.y, year.x, year.y))
@@ -39,11 +39,12 @@ final$sector = set_label(final$sector, "Sector economico")
 final$clase = set_label(final$clase, "Posicion de clase")
 final$pm_index = set_label(final$pm_index, "Indice de actitud solidaria hacia el trabajo")
 final$job_money = set_label(final$job_money, "Actitud mercantilizada hacia el trabajo")
-final$apoyo_nacional = set_label(final$apoyo_nacional, "Legitimidad nacional de actores sindicales")
+final$UNION = set_label(final$densidad, "Afiliación sindical")
+#final$apoyo_nacional = set_label(final$apoyo_nacional, "Legitimidad nacional de actores sindicales")
 final$densidad = set_label(final$densidad, "Densidad sindical")
 final$lri = set_label(final$lri, "Indice de derechos laborales")
 final$plp = set_label(final$plp, "Poder potencial de los trabajadores")
-final$nni_pc = set_label(final$nni_pc, "INN per capita")
+final$pib_pc = set_label(final$pib_pc, "PIB per capita")
 final$country = set_label(final$country, "Pais")
 final$have_index = set_label(final$have_index, "Indice de condiciones laborales")
 final$job_money = set_label(final$job_money, "Actitud mercantilizada hacia el trabajo")

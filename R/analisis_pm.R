@@ -6,6 +6,10 @@ data <- readRDS("output/data/data.rds")
 
 data$pm_suma = as_factor(data$pm_suma)
 data$country = as_factor(data$country)
+data$pm_ord <- factor(ifelse(data$pm_suma %in% c(0:5), "Bajo", 
+                             ifelse(data$pm_suma == 6, "Medio", 
+                                    ifelse(data$pm_suma %in% c(7,8), "Alto", NA))), 
+                      levels = c("Bajo", "Medio", "Alto"))
 
 # data$pm_ordinal <- car::recode(data$pm_suma, 
 #                                c("c(0,1) = 0;
@@ -240,3 +244,32 @@ tab_model(list(ml_plp_pm, ml_densidad_pm, ml_lri_pm, ml_apoyo_pm, ml_tot_pm),
           string.intercept = "Intercepto",
           file = "output/fig/ml_pm.html")
 webshot("output/fig/ml_pm.html", "output/fig/ml_pm.png")
+
+
+tot = MCMCglmm(fixed = pm_suma ~ clase + have_index + SEX,
+               random = ~ country:plp + country:densidad + country:lri + country:apoyo_nacional,
+               family = "ordinal", nitt = 10000, burnin = 8000,
+               thin = 25, data = data)
+
+plp = MCMCglmm(fixed = pm_suma ~ clase + have_index + SEX,
+               random = ~ country:plp,
+               family = "ordinal", nitt = 10000, burnin = 8000,
+               thin = 25, data = data)
+
+den = MCMCglmm(fixed = pm_suma ~ clase + have_index + SEX,
+               random = ~ country:densidad,
+               family = "ordinal", nitt = 10000, burnin = 8000,
+               thin = 25, data = data)
+
+lri = MCMCglmm(fixed = pm_suma ~ clase + have_index + SEX,
+               random = ~ country:lri,
+               family = "ordinal", nitt = 10000, burnin = 8000,
+               thin = 25, data = data)
+
+an = MCMCglmm(fixed = pm_suma ~ clase + have_index + SEX,
+              random = ~ country:apoyo_nacional,
+              family = "ordinal", nitt = 10000, burnin = 8000,
+              thin = 25, data = data)
+
+save(tot, plp, den, lri, an, file = "output/modelos/mod_pm.RData")
+
