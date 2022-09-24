@@ -1,7 +1,7 @@
 rm(list = ls())
 pacman::p_load(tidyverse, lme4, sjmisc, 
                sjPlot, tidyverse, 
-               lmerTest, multileveltools,  
+               lmerTest, #multileveltools,  
                webshot)
 data <- readRDS("output/data/data.rds")
 
@@ -15,20 +15,18 @@ lm_sim_ci <- lm(job_money ~ clase, data = data)
 lm_sc_ci <- lm(job_money ~ clase + UNION, data = data) 
 lm_clase_ci <- lm(job_money ~ clase + UNION + SEX, data = data) 
 
-ml_tot_ci <- lmer(job_money ~ clase +
-                    (plp + lri + pib_pc|country) +
+ml_tot_ci <- lmer(job_money ~ clase + 
+                    (plp + lri|country) +
                     UNION + SEX, data)
 
-ml_plp_ci <- lmer(job_money ~ clase + UNION + SEX +(plp + pib_pc|country), data)
+ml_plp_ci <- lmer(job_money ~ clase + UNION + SEX + (plp|country), data)
 
-ml_densidad_ci <- lmer(job_money ~ clase + UNION + SEX + (densidad + pib_pc|country), data)
-
-ml_lri_ci <- lmer(job_money ~ clase + UNION + SEX + (lri + pib_pc|country), data)
+ml_lri_ci <- lmer(job_money ~ clase + UNION + SEX + (lri|country), data)
 
 # Un nivel -----------------------------------------------
 
 tab_model(list(lm_sim_ci, lm_sc_ci, lm_clase_ci),
-          title = "Regresion ordinal sobre actitud mercantilizada hacia el trabajo",  
+          title = "Regresion lineal sobre actitud mercantilizada hacia el trabajo",  
           auto.label = T, 
           dv.labels = c("Actitud mercantilizada hacia el trabajo",
                         "Actitud mercantilizada hacia el trabajo",
@@ -43,11 +41,10 @@ tab_model(list(lm_sim_ci, lm_sc_ci, lm_clase_ci),
 webshot("output/fig/lm_ci.html", "output/fig/lm_ci.png")
 
 # Multinivel --------------------------------------------------------------
-tab_model(list(ml_plp_ci, ml_densidad_ci, ml_lri_ci,  ml_tot_ci),
-          title = "Regresion ordinal multinivel sobre actitud mercantilizada hacia el trabajo",  
+tab_model(list(ml_plp_ci, ml_lri_ci,  ml_tot_ci),
+          title = "Regresion lineal multinivel sobre actitud mercantilizada hacia el trabajo",  
           auto.label = T,
           dv.labels = c("Actitud mercantilizada hacia el trabajo",
-                        "Actitud mercantilizada hacia el trabajo",
                         "Actitud mercantilizada hacia el trabajo",
                         "Actitud mercantilizada hacia el trabajo"),
           collapse.se = T,

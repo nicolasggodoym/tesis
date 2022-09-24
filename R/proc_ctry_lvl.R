@@ -27,7 +27,6 @@ source("R/ilostat.R")
 
 source("R/labour_rights_index.R")
 
-
 ### Adjusted net national income per capita ---------------------------------
 
 source("R/world-bank.R")
@@ -120,11 +119,14 @@ ctry_lvl = ctry_lvl %>%
          sd_plp = sd(plp, na.rm =T),
          mean_pibpc = mean(pib_pc, na.rm =T),
          sd_pibpc = sd(pib_pc, na.rm =T)) %>% 
-  mutate(densidad = (densidad - mean_d)/sd_d,
-         lri = -1*(lri - mean_lri)/sd_lri,
-         plp = (plp - mean_plp)/sd_plp,
-         pib_pc = (pib_pc - mean_pibpc)/sd_pibpc) %>% 
-    select(-c(starts_with("mean"), starts_with("sd")))
+  mutate(densidad = (densidad - mean_d)/max(densidad),
+         lri = (lri)/max(lri)*100,
+         plp = (plp)/max(plp)*100) %>%
+  mutate(lri = ifelse(lri == 0, 100, 
+                      ifelse(lri == 100, 0,
+                             100-lri))) %>% 
+  select(-c(starts_with("mean"), starts_with("sd"))) %>% 
+  filter(!duplicated(iso3c))
 
 #dpi <- merge(country_codes, dpi, by = "country") %>% select(-country)
 

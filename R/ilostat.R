@@ -57,7 +57,7 @@ unemp <- unemp %>%
   select(iso3c = 2,
          year = time,
          ed = classif2,
-         unemp_tot = 8) %>% 
+         unemp_tot = 9) %>% 
   pivot_wider(id_cols = c(1,2),
               names_from = ed,
               values_from = unemp_tot) %>% 
