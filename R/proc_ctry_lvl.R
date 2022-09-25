@@ -119,12 +119,14 @@ ctry_lvl = ctry_lvl %>%
          sd_plp = sd(plp, na.rm =T),
          mean_pibpc = mean(pib_pc, na.rm =T),
          sd_pibpc = sd(pib_pc, na.rm =T)) %>% 
-  mutate(densidad = (densidad - mean_d)/max(densidad),
-         lri = (lri)/max(lri)*100,
-         plp = (plp)/max(plp)*100) %>%
-  mutate(lri = ifelse(lri == 0, 100, 
-                      ifelse(lri == 100, 0,
-                             100-lri))) %>% 
+  mutate(lri_std = (lri-mean_lri)/sd_lri,
+         plp_std = (plp-mean_plp)/sd_plp,
+         den_std = (densidad-mean_d)/sd_d) %>% 
+  mutate(lri = (lri)/max(lri)*10,
+         plp = (plp)/max(plp)*10) %>%
+  mutate(lri = ifelse(lri == 0, 10, 
+                      ifelse(lri == 10, 0,
+                             10-lri))) %>% 
   select(-c(starts_with("mean"), starts_with("sd"))) %>% 
   filter(!duplicated(iso3c))
 

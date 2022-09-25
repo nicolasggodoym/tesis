@@ -21,7 +21,7 @@ data %>%
   frq(country,
       show.na = F,
       out = "viewer",
-      encoding = "UTF-8") %>%  
+      encoding = "LATIN1") %>%  
   as.data.frame() %>% #Transformamos en dataframe para manipular con dplyr
   select(val, frq, raw.prc) %>% #Seleccionamos columnas de interés
   mutate(raw.prc = paste(.$raw.prc, "%")) %>% #Incorporamos porcentaje con paste()
@@ -54,28 +54,63 @@ data %>%
   kable_classic(full_width = F,
                 html_font = "Times New Roman") %>% 
   footnote("Elaboración propia",
-           general_title = "Fuente :") %>%
-  cat(., file = "output/fig/clase_frq.html")
+           general_title = "Fuente :") 
 webshot("output/fig/clase_frq.html", "output/fig/clase_frq.png")
+
+
+# Distribución afiliación sindical ----------------------------------------
+data %>% 
+  frq(UNION,
+      show.na = F,
+      out = "viewer",
+      encoding = "UTF-8") %>%  
+  as.data.frame() %>% #Transformamos en dataframe para manipular con dplyr
+  select(val, frq, raw.prc) %>% #Seleccionamos columnas de interés
+  mutate(raw.prc = paste(.$raw.prc, "%")) %>% #Incorporamos porcentaje con paste()
+  kable(caption = "Distribución de la variable afiliación sindical",
+        format = "html",
+        col.names = c("Afiliación sindical", "Frecuencia absoluta", "Frecuencia relativa")) %>% 
+  kable_classic(full_width = F,
+                html_font = "Times New Roman") %>% 
+  footnote("Elaboración propia",
+           general_title = "Fuente :") 
+webshot("output/fig/union.html", "output/fig/union.png")
+
 
 
 # Distribución variables macro --------------------------------------------
 data %>% 
   group_by(country) %>%
   summarise(plp = round(mean(plp),3),
-            lri = round(mean(lri), 3)) %>% 
+            lri = round(mean(lri), 3),
+            densidad = round(mean(densidad), 3)) %>% 
   ungroup() %>% #Transformamos en dataframe para manipular con dplyr
   kable(caption = "Distribución de variables macro según país",
         format = "html",
-        col.names = c("País", "P.P.T.", 
+        col.names = c("País", "P.P.T.", "Densidad sindical", 
                       "Índice de derechos Laborales")) %>% 
   kable_classic(full_width = F,
                 html_font = "Times New Roman") %>% 
   footnote("Elaboración propia",
-           general_title = "Fuente :") %>%
-  cat(., file = "output/fig/country_summary.html")
+           general_title = "Fuente :") 
 webshot("output/fig/country_summary.html", "output/fig/country_summary.png")
 
+#### ESTANDARIZADO
+data %>% 
+  group_by(country) %>%
+  summarise(plp_std = round(mean(plp_std),3),
+            den_std = round(mean(den_std), 3),
+            lri_std = round(mean(lri_std), 3)) %>% 
+  ungroup() %>% #Transformamos en dataframe para manipular con dplyr
+  kable(caption = "Distribución de variables macro según país",
+        format = "html",
+        col.names = c("País", "P.P.T.", "Densidad sindical", 
+                      "Índice de derechos Laborales")) %>% 
+  kable_classic(full_width = F,
+                html_font = "Times New Roman") %>% 
+  footnote("Elaboración propia",
+           general_title = "Fuente :") 
+webshot("output/fig/country_summary_std.html", "output/fig/country_summary_std.png")
 
 # Dependiente x clase social ----------------------------------------------
 
@@ -91,6 +126,5 @@ data %>%
   kable_classic(full_width = F,
                 html_font = "Times New Roman") %>% 
   footnote("Elaboración propia",
-           general_title = "Fuente :") %>%
-  cat(., file = "output/fig/clase_ci.html")
+           general_title = "Fuente :") 
 webshot("output/fig/clase_ci.html", "output/fig/clase_ci.png")
