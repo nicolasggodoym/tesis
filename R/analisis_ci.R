@@ -84,5 +84,6 @@ tab_model(list(ml_plp_std, ml_lri_std, ml_den_std, ml_tot_std),
           string.est = "Coef.",
           string.p = "P-valor",
           string.intercept = "Intercepto",
-          encoding = "UTF-8")
+          encoding = "UTF-8",
+          file = "output/fig/ml_std.html")
 webshot("output/fig/ml_std.html", "output/fig/ml_std.png")

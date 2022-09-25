@@ -121,7 +121,8 @@ ctry_lvl = ctry_lvl %>%
          sd_pibpc = sd(pib_pc, na.rm =T)) %>% 
   mutate(lri_std = (lri-mean_lri)/sd_lri,
          plp_std = (plp-mean_plp)/sd_plp,
-         den_std = (densidad-mean_d)/sd_d) %>% 
+         den_std = (densidad-mean_d)/sd_d,
+         pib_std = (pib_pc-mean_pibpc)/sd_pibpc) %>% 
   mutate(lri = (lri)/max(lri)*10,
          plp = (plp)/max(plp)*10) %>%
   mutate(lri = ifelse(lri == 0, 10, 
