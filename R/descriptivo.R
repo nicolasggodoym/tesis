@@ -100,18 +100,29 @@ data %>%
   group_by(country) %>%
   summarise(plp_std = round(mean(plp_std),3),
             den_std = round(mean(den_std), 3),
-            lri_std = round(mean(lri_std), 3)) %>% 
+            lri_std = round(mean(lri_std), 3),
+            ipo = round(mean(ipo), 3)) %>% 
   ungroup() %>% #Transformamos en dataframe para manipular con dplyr
   kable(caption = "Distribución de variables macro según país",
         format = "html",
         col.names = c("País", "P.P.T.", "Densidad sindical", 
-                      "Índice de derechos Laborales")) %>% 
+                      "Índice de derechos Laborales",
+                      "Índice de Poder Obrero")) %>% 
   kable_classic(full_width = F,
                 html_font = "Times New Roman") %>% 
   footnote("Elaboración propia",
            general_title = "Fuente :") 
 webshot("output/fig/country_summary_std.html", "output/fig/country_summary_std.png")
 
+
+# Correlación variables macro ---------------------------------------------
+
+sjPlot::tab_corr(data %>% select(plp_std, den_std, lri_std),
+                 title = "Correlación de Pearson para variables macro",
+                 corr.method = "pearson",
+                 triangle = "lower",
+                 file = "output/fig/country_corr.html") 
+webshot("output/fig/country_corr.html", "output/fig/country_corr.png")
 # Dependiente x clase social ----------------------------------------------
 
 #CI
