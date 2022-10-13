@@ -49,6 +49,7 @@ ml_lri_std <- lmer(job_money ~ clase + UNION + SEX + (lri_std|country), data)
 
 final_fix = lmer(job_money ~ clase + UNION + SEX +ipo+(1|country), data)
 final_rand = lmer(job_money ~ clase + UNION + SEX +(ipo|country), data)
+final_norand = lmer(job_money ~ clase + UNION + SEX +(1|country), data)
 # Un nivel -----------------------------------------------
 
 tab_model(list(lm_sim_ci, lm_un_ci, lm_sx_ci, lm_clase_ci),
@@ -128,12 +129,13 @@ tab_model(list(ml_tot_std, ml_plplri_std, ml_plpden_std, ml_lriden_std),
           file = "output/fig/ml2_std.html")
 webshot("output/fig/ml2_std.html", "output/fig/ml2_std.png")
 
-tab_model(list(ml_tot_std, final_fix, final_rand),
+tab_model(list(ml_tot_std, final_fix, final_rand, final_norand),
           title = "Regresion lineal multinivel sobre actitud mercantilizada hacia el trabajo",  
           auto.label = T,
           dv.labels = c("Modelo 8",
                         "Modelo 12",
-                        "Modelo 13"),
+                        "Modelo 13",
+                        "Modelo 14"),
           collapse.se = T,
           show.ci = F,
           string.pred = "Predictores",
@@ -162,7 +164,8 @@ Modelos = c("Modelo 1",
             "Modelo 10",
             "Modelo 11",
             "Modelo 12",
-            "Modelo 13")
+            "Modelo 13",
+            "Modelo 14")
 
 AIC = c(AIC(lm_sim_ci),
         AIC(lm_un_ci),
@@ -176,7 +179,8 @@ AIC = c(AIC(lm_sim_ci),
         AIC(ml_plpden_std),
         AIC(ml_lriden_std),
         AIC(final_fix),
-        AIC(final_rand))
+        AIC(final_rand),
+        AIC(final_norand))
 
 
 BIC = c(BIC(lm_sim_ci),
@@ -191,9 +195,25 @@ BIC = c(BIC(lm_sim_ci),
         BIC(ml_plpden_std),
         BIC(ml_lriden_std),
         BIC(final_fix),
-        BIC(final_rand))
+        BIC(final_rand),
+        BIC(final_norand))
 
-data.frame(Modelos, AIC, BIC) %>% 
+Devianza = c(deviance(lm_sim_ci),
+             deviance(lm_un_ci),
+             deviance(lm_sx_ci),
+             deviance(lm_clase_ci),
+             deviance(ml_plp_std),
+             deviance(ml_den_std),
+             deviance(ml_lri_std),
+             deviance(ml_tot_std),
+             deviance(ml_plplri_std),
+             deviance(ml_plpden_std),
+             deviance(ml_lriden_std),
+             deviance(final_fix),
+             deviance(final_rand),
+             deviance(final_norand))
+
+data.frame(Modelos, AIC, BIC, Devianza) %>% 
   kable(caption = "Comparación de ajuste de modelos",
         format = "html") %>% 
   kable_classic(full_width = F,
@@ -201,4 +221,26 @@ data.frame(Modelos, AIC, BIC) %>%
   footnote("Elaboración propia",
            general_title = "Fuente :")
 webshot("output/fig/ajuste_modelos.html", "output/fig/ajuste_modelos.png")
+
+
+# Comparativa pendientes e interceptos ------------------------------------
+
+x <- data.frame(coef(final_rand)$country)
+
+x = x[, c(1,2)]
+
+x %>% 
+  rename(b0 = 2, ipo = 1) %>% 
+  kable(caption = "Pendientes e interceptos aleatorios estimados en el 
+Modelo 13",
+        format = "html",
+        col.names = c("Intercepto aleatorio",
+                      "Pendiente aleatoria")) %>% 
+  kable_classic(full_width = F,
+                html_font = "Times New Roman") %>% 
+  footnote("Elaboración propia",
+           general_title = "Fuente :")
+webshot("output/fig/random_effects_mod13.html", "output/fig/random_effects_mod13.png")
+
+
 

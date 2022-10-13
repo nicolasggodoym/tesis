@@ -215,7 +215,7 @@ data <- data %>%
  rowwise() %>%
  mutate(have_suma = sum(have_security, have_income, have_advance, have_interest, have_indep, have_helpful, have_useful, na.rm = T),
        pm_suma = sum(pi_useful, pi_helpful, na.rm = T)) %>%
-  mutate(have_index = (have_suma/max(.$have_suma) * 100)) %>%
+  mutate(have_index = (have_suma/max(.$have_suma) * 5)) %>%
  ungroup() %>%
  select(country, iso2c, 
         job_money, pm_suma, 
