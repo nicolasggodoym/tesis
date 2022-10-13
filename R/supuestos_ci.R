@@ -13,7 +13,7 @@ data <- readRDS("output/data/data.rds")
 
 # Crear modelos -----------------------------------------------------------
 
-mod = lmer(job_money ~ clase + UNION + SEX +(ipo|iso3c), data)
+mod = lmer(job_money ~ clase + UNION + SEX + ipo + (1|iso3c), data)
 
 # Análisis de supuestos ---------------------------------------------------
 
