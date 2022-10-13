@@ -225,22 +225,18 @@ webshot("output/fig/ajuste_modelos.html", "output/fig/ajuste_modelos.png")
 
 # Comparativa pendientes e interceptos ------------------------------------
 
-x <- data.frame(coef(final_rand)$country)
-
-x = x[, c(1,2)]
+x <- data.frame(coef(final_fix)$country)
 
 x %>% 
-  rename(b0 = 2, ipo = 1) %>% 
-  kable(caption = "Pendientes e interceptos aleatorios estimados en el 
-Modelo 13",
+  select(b0 = 2) %>% 
+  kable(caption = "Interceptos aleatorios estimados en el 
+Modelo 12",
         format = "html",
-        col.names = c("Intercepto aleatorio",
-                      "Pendiente aleatoria")) %>% 
+        col.names = c("Intercepto aleatorio")) %>% 
   kable_classic(full_width = F,
                 html_font = "Times New Roman") %>% 
   footnote("Elaboración propia",
            general_title = "Fuente :")
 webshot("output/fig/random_effects_mod13.html", "output/fig/random_effects_mod13.png")
-
 
 
