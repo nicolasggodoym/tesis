@@ -223,20 +223,67 @@ data.frame(Modelos, AIC, BIC, Devianza) %>%
 webshot("output/fig/ajuste_modelos.html", "output/fig/ajuste_modelos.png")
 
 
+# Razón de verosimilitud (test de devianza) --------------------------------
+
+test01<- anova(final_fix,lm_sim_ci,test = "Chisq")
+test02<- anova(final_fix,lm_un_ci,test = "Chisq")
+test03<- anova(final_fix,lm_sx_ci,test = "Chisq")
+test04<- anova(final_fix,lm_clase_ci,test = "Chisq")
+test05<- anova(final_fix,ml_plp_std,test = "Chisq")
+test06<- anova(final_fix,ml_den_std,test = "Chisq")
+test07<- anova(final_fix,ml_lri_std,test = "Chisq")
+test08<- anova(final_fix,ml_tot_std,test = "Chisq")
+test09<- anova(final_fix,ml_plplri_std,test = "Chisq")
+test10<- anova(final_fix,ml_plpden_std,test = "Chisq")
+test11<- anova(final_fix,ml_lriden_std,test = "Chisq")
+test12<- anova(final_fix,final_rand,test = "Chisq")
+test13<- anova(final_fix,final_norand,test = "Chisq")
+
+lrt01<- rbind(test01,test02,test03,
+              test04, test05, test06,
+              test07, test08, test09,
+              test10, test11, test12,
+              test13) %>% unique()
+row.names(lrt01) <- c("Modelo 1",
+                      "Modelo 2",
+                      "Modelo 3",
+                      "Modelo 4",
+                      "Modelo 5", 
+                      "Modelo 6",
+                      "Modelo 7",
+                      "Modelo 8",
+                      "Modelo 9",
+                      "Modelo 10",
+                      "Modelo 11",
+                      "Modelo 13",
+                      "Modelo 14")
+knitr::kable(lrt01,digits = 3, caption = "Test de devianza entre modelos")
+
+
+
+
+
 # Comparativa pendientes e interceptos ------------------------------------
 
 x <- data.frame(coef(final_fix)$country)
 
+pais = sort(unique(data$country))
+ipo = data %>% 
+  select(pais = country, ipo) %>% 
+  distinct(pais, ipo)
+x <- data.frame(pais, b0 = coef(final_fix)$country)
+x = merge(x, ipo, by = "pais")
 x %>% 
-  select(b0 = 2) %>% 
+  select(1, 2, ipo) %>% 
+  mutate_at(vars(2, 3), ~(round(., 3))) %>% 
   kable(caption = "Interceptos aleatorios estimados en el 
 Modelo 12",
         format = "html",
-        col.names = c("Intercepto aleatorio")) %>% 
+        col.names = c("País",
+                      "Intercepto aleatorio",
+                      "IPO")) %>% 
   kable_classic(full_width = F,
                 html_font = "Times New Roman") %>% 
   footnote("Elaboración propia",
            general_title = "Fuente :")
-webshot("output/fig/random_effects_mod13.html", "output/fig/random_effects_mod13.png")
-
-
+webshot("output/fig/interceptos_mod12.html", "output/fig/interceptos_mod12.png")

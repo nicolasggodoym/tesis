@@ -194,21 +194,27 @@ data <- issp %>%
          
 ### c) Construcción de la variable clase social (clase) ---------------------
          clase = factor(case_when(propiedad %in% c('Propietario', 'Propietario de negocio familiar') & NEMPLOY %in% c("3 a 49 empleados", "Más de 50 empleados") ~ 'Capitalista',
-                                  propiedad == 'Pequeña burguesia' | ((propiedad == 'Propietario' | propiedad == 'Propietario de negocio familiar') & NEMPLOY == "1 o 2 empleados") ~ 'Pequeña burguesia',
-                                  propiedad == 'No propietario' & WRKSUP == 1 & habilidades == 'Experto' ~ 'Experto directivo/supervisor',
-                                  propiedad == 'No propietario' & WRKSUP == 1 & habilidades == 'Calificado' ~ 'Directivo/supervisor semi-credencializado',
-                                  propiedad == 'No propietario' & WRKSUP == 1 & habilidades == 'No calificado' ~ 'Directivo/supervisor no credencializado',
+                                  propiedad == 'Pequeña burguesia' | 
+                                    ((propiedad == 'Propietario' | propiedad == 'Propietario de negocio familiar') & 
+                                       NEMPLOY == "1 o 2 empleados" & habilidades == 'Experto') ~ 'Pequeña burguesia profesional',
+                                  propiedad == 'Pequeña burguesia' | 
+                                    ((propiedad == 'Propietario' | propiedad == 'Propietario de negocio familiar') & 
+                                       NEMPLOY == "1 o 2 empleados" & habilidades != 'Experto') ~ 'Pequeña burguesia no profesional',
+                                  propiedad == 'No propietario' & WRKSUP == 1 & habilidades == 'Experto' ~ 'Gerente',
+                                  propiedad == 'No propietario' & WRKSUP == 1 & habilidades == 'Calificado' ~ 'Directivo/supervisor calificado',
+                                  propiedad == 'No propietario' & WRKSUP == 1 & habilidades == 'No calificado' ~ 'Directivo/supervisor no calificado',
                                   propiedad == 'No propietario' & WRKSUP == 2 & habilidades == 'Experto' ~ 'Experto no directivo',
-                                  propiedad == 'No propietario' & WRKSUP == 2 & habilidades == 'Calificado' ~ 'Obrero semi-credencializado',
+                                  propiedad == 'No propietario' & WRKSUP == 2 & habilidades == 'Calificado' ~ 'Obrero calificado',
                                   propiedad == 'No propietario' & WRKSUP == 2 & habilidades == 'No calificado' ~ 'Proletario',
                                   TRUE ~ NA_character_), 
                         levels = c('Proletario',
-                                   'Obrero semi-credencializado', 
+                                   'Obrero calificado', 
                                    'Experto no directivo',
-                                   'Directivo/supervisor no credencializado',
-                                   'Directivo/supervisor semi-credencializado', 
-                                   'Experto directivo/supervisor',
-                                   'Pequeña burguesia',
+                                   'Directivo/supervisor no calificado',
+                                   'Directivo/supervisor calificado', 
+                                   'Gerente',
+                                   'Pequeña burguesia profesional',
+                                   'Pequeña burguesía no profesional',
                                    'Capitalista'))) 
 
 data <- data %>%
