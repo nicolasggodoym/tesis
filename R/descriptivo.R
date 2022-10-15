@@ -31,8 +31,7 @@ data %>%
   kable_classic(full_width = F,
                 html_font = "Times New Roman") %>% 
   footnote("Elaboración propia",
-           general_title = "Fuente :") %>%
-  cat(., file = "output/fig/clase_distr.html")
+           general_title = "Fuente :")
 webshot("output/fig/country_distr.html", "output/fig/country_distr.png")
 
 
