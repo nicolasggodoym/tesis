@@ -70,24 +70,24 @@ tab_model(list(lm_sim_ci, lm_un_ci, lm_sx_ci, lm_clase_ci),
 webshot("output/fig/lm_ci.html", "output/fig/lm_ci.png")
 
 # Multinivel --------------------------------------------------------------
-tab_model(list(ml_plp_ci, ml_lri_ci, ml_den_ci, ml_tot_ci),
-          title = "Regresion lineal multinivel sobre actitud mercantilizada hacia el trabajo",  
-          auto.label = T,
-          dv.labels = c("Modelo 5",
-                        "Modelo 6",
-                        "Modelo 7",
-                        "Modelo 8"),
-          collapse.se = T,
-          show.ci = F,
-          string.pred = "Predictores",
-          string.est = "Coef.",
-          string.p = "P-valor",
-          string.intercept = "Intercepto",
-          encoding = "UTF-8",
-          show.r2 = F,
-          file = "output/fig/ml_ci.html")
-
-webshot("output/fig/ml_ci.html", "output/fig/ml_ci.png")
+# tab_model(list(ml_plp_ci, ml_lri_ci, ml_den_ci, ml_tot_ci),
+#           title = "Regresion lineal multinivel sobre actitud mercantilizada hacia el trabajo",  
+#           auto.label = T,
+#           dv.labels = c("Modelo 5",
+#                         "Modelo 6",
+#                         "Modelo 7",
+#                         "Modelo 8"),
+#           collapse.se = T,
+#           show.ci = F,
+#           string.pred = "Predictores",
+#           string.est = "Coef.",
+#           string.p = "P-valor",
+#           string.intercept = "Intercepto",
+#           encoding = "UTF-8",
+#           show.r2 = F,
+#           file = "output/fig/ml_ci.html")
+# 
+# webshot("output/fig/ml_ci.html", "output/fig/ml_ci.png")
 
 tab_model(list(ml_plp_std, ml_den_std, ml_lri_std, ml_tot_std),
           title = "Regresion lineal multinivel sobre actitud mercantilizada hacia el trabajo",  
@@ -225,41 +225,41 @@ webshot("output/fig/ajuste_modelos.html", "output/fig/ajuste_modelos.png")
 
 # Razón de verosimilitud (test de devianza) --------------------------------
 
-test01<- anova(final_fix,lm_sim_ci,test = "Chisq")
-test02<- anova(final_fix,lm_un_ci,test = "Chisq")
-test03<- anova(final_fix,lm_sx_ci,test = "Chisq")
-test04<- anova(final_fix,lm_clase_ci,test = "Chisq")
-test05<- anova(final_fix,ml_plp_std,test = "Chisq")
-test06<- anova(final_fix,ml_den_std,test = "Chisq")
-test07<- anova(final_fix,ml_lri_std,test = "Chisq")
-test08<- anova(final_fix,ml_tot_std,test = "Chisq")
-test09<- anova(final_fix,ml_plplri_std,test = "Chisq")
-test10<- anova(final_fix,ml_plpden_std,test = "Chisq")
-test11<- anova(final_fix,ml_lriden_std,test = "Chisq")
-test12<- anova(final_fix,final_rand,test = "Chisq")
-test13<- anova(final_fix,final_norand,test = "Chisq")
-
-lrt01<- rbind(test01,test02,test03,
-              test04, test05, test06,
-              test07, test08, test09,
-              test10, test11, test12,
-              test13) %>% unique()
-row.names(lrt01) <- c("Modelo 1",
-                      "Modelo 2",
-                      "Modelo 3",
-                      "Modelo 4",
-                      "Modelo 5", 
-                      "Modelo 6",
-                      "Modelo 7",
-                      "Modelo 8",
-                      "Modelo 9",
-                      "Modelo 10",
-                      "Modelo 11",
-                      "Modelo 13",
-                      "Modelo 14")
-knitr::kable(lrt01,digits = 3, caption = "Test de devianza entre modelos")
-
-
+# test01<- anova(final_fix,lm_sim_ci,test = "Chisq")
+# test02<- anova(final_fix,lm_un_ci,test = "Chisq")
+# test03<- anova(final_fix,lm_sx_ci,test = "Chisq")
+# test04<- anova(final_fix,lm_clase_ci,test = "Chisq")
+# test05<- anova(final_fix,ml_plp_std,test = "Chisq")
+# test06<- anova(final_fix,ml_den_std,test = "Chisq")
+# test07<- anova(final_fix,ml_lri_std,test = "Chisq")
+# test08<- anova(final_fix,ml_tot_std,test = "Chisq")
+# test09<- anova(final_fix,ml_plplri_std,test = "Chisq")
+# test10<- anova(final_fix,ml_plpden_std,test = "Chisq")
+# test11<- anova(final_fix,ml_lriden_std,test = "Chisq")
+# test12<- anova(final_fix,final_rand,test = "Chisq")
+# test13<- anova(final_fix,final_norand,test = "Chisq")
+# 
+# lrt01<- rbind(test01,test02,test03,
+#               test04, test05, test06,
+#               test07, test08, test09,
+#               test10, test11, test12,
+#               test13) %>% unique()
+# row.names(lrt01) <- c("Modelo 1",
+#                       "Modelo 2",
+#                       "Modelo 3",
+#                       "Modelo 4",
+#                       "Modelo 5", 
+#                       "Modelo 6",
+#                       "Modelo 7",
+#                       "Modelo 8",
+#                       "Modelo 9",
+#                       "Modelo 10",
+#                       "Modelo 11",
+#                       "Modelo 13",
+#                       "Modelo 14")
+# knitr::kable(lrt01,digits = 3, caption = "Test de devianza entre modelos")
+# 
+# 
 
 
 

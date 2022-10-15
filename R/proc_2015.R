@@ -180,9 +180,7 @@ data <- issp %>%
                                c(0, 7, 9) = NA")),
         propiedad = car::recode(.$EMPREL,
                                  recodes = c("1 = 'No propietario';
-                                             2 = 'Pequeña burguesia';
-                                             3 = 'Propietario';
-                                             4 = 'Propietario de negocio familiar'")),
+                                             c(2,3,4) = 'Propietario'")),
          ISCO08 = substr(.$ISCO08, start = 1, stop = 2)) %>% 
          mutate(habilidades = car::recode(.$ISCO08, 
                                    recodes = "10:26= 'Experto';
@@ -190,16 +188,17 @@ data <- issp %>%
                                    c(40, 41, 42, 43, 44, 50, 52, 53, 54, 62, 63, 70, 71, 73, 
                                    74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 
                                    89, 90, 91, 92, 93, 94, 95, 96)= 'No calificado';
-                                   99=NA"),
+                                   99=NA")) %>% 
          
 ### c) Construcción de la variable clase social (clase) ---------------------
-         clase = factor(case_when(propiedad %in% c('Propietario', 'Propietario de negocio familiar') & NEMPLOY %in% c("3 a 49 empleados", "Más de 50 empleados") ~ 'Capitalista',
-                                  propiedad == 'Pequeña burguesia' | 
-                                    ((propiedad == 'Propietario' | propiedad == 'Propietario de negocio familiar') & 
-                                       NEMPLOY == "1 o 2 empleados" & habilidades == 'Experto') ~ 'Pequeña burguesia profesional',
-                                  propiedad == 'Pequeña burguesia' | 
-                                    ((propiedad == 'Propietario' | propiedad == 'Propietario de negocio familiar') & 
-                                       NEMPLOY == "1 o 2 empleados" & habilidades != 'Experto') ~ 'Pequeña burguesia no profesional',
+         mutate(clase = factor(case_when(propiedad == 'Propietario' & 
+                                    NEMPLOY %in% c("3 a 49 empleados", "Más de 50 empleados") ~ 'Capitalista',
+                                  propiedad == 'Propietario' & 
+                                    NEMPLOY == "1 o 2 empleados" & 
+                                    habilidades == 'Experto' ~ 'Pequeña burguesia profesional',
+                                  propiedad == 'Propietario' & 
+                                    NEMPLOY == "1 o 2 empleados" & 
+                                    habilidades != 'Experto' ~ 'Pequeña burguesia no profesional',
                                   propiedad == 'No propietario' & WRKSUP == 1 & habilidades == 'Experto' ~ 'Gerente',
                                   propiedad == 'No propietario' & WRKSUP == 1 & habilidades == 'Calificado' ~ 'Directivo/supervisor calificado',
                                   propiedad == 'No propietario' & WRKSUP == 1 & habilidades == 'No calificado' ~ 'Directivo/supervisor no calificado',
@@ -213,8 +212,8 @@ data <- issp %>%
                                    'Directivo/supervisor no calificado',
                                    'Directivo/supervisor calificado', 
                                    'Gerente',
+                                   'Pequeña burguesia no profesional',
                                    'Pequeña burguesia profesional',
-                                   'Pequeña burguesía no profesional',
                                    'Capitalista'))) 
 
 data <- data %>%
