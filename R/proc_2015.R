@@ -140,11 +140,11 @@ data <- issp %>%
                                             5 = 0")))) %>% 
   mutate(country = str_sub(.$country, start = 4, -1), 
          job_money = car::recode(.$job_money, 
-                                 recodes = c("1 = 0;
-                                             2 = 1;
+                                 recodes = c("1 = 4;
+                                             2 = 3;
                                              3 = 2;
-                                             4 = 3;
-                                             5 = 4")),
+                                             4 = 1;
+                                             5 = 0")),
          union_need = factor(ifelse(union_need %in% c(0:2), "Desacuerdo",
                                     ifelse(union_need %in% c(3,4), "De acuerdo", NA)),
                              levels = c("Desacuerdo", "De acuerdo")),

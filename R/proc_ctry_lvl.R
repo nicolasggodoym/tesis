@@ -111,7 +111,8 @@ ctry_lvl = ctry_lvl %>%
                        .)))) %>% 
   filter(year == 2015) %>% 
   select(-year) %>% 
-  mutate(mean_d = mean(densidad, na.rm =T),
+  mutate(lri = 10-lri,
+         mean_d = mean(densidad, na.rm =T),
          sd_d = sd(densidad, na.rm =T),
          mean_lri = mean(lri, na.rm =T),
          sd_lri = sd(lri, na.rm =T),
@@ -119,7 +120,7 @@ ctry_lvl = ctry_lvl %>%
          sd_plp = sd(plp, na.rm =T),
          mean_pibpc = mean(pib_pc, na.rm =T),
          sd_pibpc = sd(pib_pc, na.rm =T)) %>% 
-  mutate(lri_std = -1*(lri-mean_lri)/sd_lri,
+  mutate(lri_std = (lri-mean_lri)/sd_lri,
          plp_std = (plp-mean_plp)/sd_plp,
          den_std = (densidad-mean_d)/sd_d,
          pib_std = (pib_pc-mean_pibpc)/sd_pibpc) %>% 

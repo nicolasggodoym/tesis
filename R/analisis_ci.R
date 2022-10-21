@@ -2,7 +2,7 @@ rm(list = ls())
 pacman::p_load(tidyverse, lme4, sjmisc, 
                sjPlot, tidyverse, 
                lmerTest, kableExtra,  
-               webshot)
+               webshot, ggrepel)
 data <- readRDS("output/data/data.rds")
 
 # Modelos CI ----------------------------------------------------------
@@ -41,7 +41,7 @@ ml_lriden_std <- lmer(job_money ~ clase +
                         (lri_std+den_std|country) +
                         UNION + SEX, data)
 
-ml_den_std <- lmer(job_money ~ clase + UNION + SEX + den_std+ (1|country), data)
+ml_den_std <- lmer(job_money ~ clase + UNION + SEX + (den_std|country), data)
 ml_plp_std <- lmer(job_money ~ clase + UNION + SEX + (plp_std|country), data)
 
 ml_lri_std <- lmer(job_money ~ clase + UNION + SEX + (lri_std|country), data)
@@ -50,6 +50,7 @@ ml_lri_std <- lmer(job_money ~ clase + UNION + SEX + (lri_std|country), data)
 final_fix = lmer(job_money ~ clase + UNION + SEX +ipo+(1|country), data)
 final_rand = lmer(job_money ~ clase + UNION + SEX +(ipo|country), data)
 final_norand = lmer(job_money ~ clase + UNION + SEX +(1|country), data)
+
 # Un nivel -----------------------------------------------
 
 tab_model(list(lm_sim_ci, lm_un_ci, lm_sx_ci, lm_clase_ci),
@@ -273,17 +274,39 @@ ipo = data %>%
   distinct(pais, ipo)
 x <- data.frame(pais, b0 = coef(final_fix)$country)
 x = merge(x, ipo, by = "pais")
+row.names(x) = NULL
 x %>% 
   select(1, 2, ipo) %>% 
   mutate_at(vars(2, 3), ~(round(., 3))) %>% 
+  rowwise() %>% 
+  mutate(pred = round(b0..Intercept. + (ipo*.53), 3)) %>% 
+  ungroup() %>% 
+  .[order(.$pred, decreasing = T),] %>%  
   kable(caption = "Interceptos aleatorios estimados en el 
 Modelo 12",
         format = "html",
         col.names = c("País",
                       "Intercepto aleatorio",
-                      "IPO")) %>% 
+                      "IPO", "Valor predicho")) %>% 
   kable_classic(full_width = F,
                 html_font = "Times New Roman") %>% 
   footnote("Elaboración propia",
            general_title = "Fuente :")
 webshot("output/fig/interceptos_mod12.html", "output/fig/interceptos_mod12.png")
+
+x %>% 
+  select(1, 2, ipo) %>% 
+  mutate_at(vars(2, 3), ~(round(., 3))) %>% 
+  rowwise() %>% 
+  mutate(pred = round(b0..Intercept. + (ipo*.53), 3)) %>% 
+  ungroup() %>% 
+  ggplot(aes(x = ipo, y = pred)) +
+  geom_point() + 
+  geom_text_repel(aes(label=pais)) +
+  geom_smooth(method = "lm", colour = "black") + 
+  labs(title="Relación entre el IPO y los valores predichos para un obrero
+hombre no sindicalizado",
+       x ="IPO", y = "Valores predichos",
+       caption = "Elaboración propia") +
+  theme_minimal() 
+save_plot("output/fig/cor_predipo.jpg", fig = last_plot(), width = 19, height = 14)
