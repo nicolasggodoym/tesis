@@ -51,7 +51,7 @@ final_fix = lmer(job_money ~ clase + UNION + SEX +ipo+(1|country), data)
 final_rand = lmer(job_money ~ clase + UNION + SEX +(ipo|country), data)
 final_norand = lmer(job_money ~ clase + UNION + SEX +(1|country), data)
 
-# Un nivel -----------------------------------------------
+lm# Un nivel -----------------------------------------------
 
 tab_model(list(lm_sim_ci, lm_un_ci, lm_sx_ci, lm_clase_ci),
           title = "Regresion lineal sobre actitud mercantilizada hacia el trabajo",  
@@ -224,45 +224,6 @@ data.frame(Modelos, AIC, BIC, Devianza) %>%
 webshot("output/fig/ajuste_modelos.html", "output/fig/ajuste_modelos.png")
 
 
-# Razón de verosimilitud (test de devianza) --------------------------------
-
-# test01<- anova(final_fix,lm_sim_ci,test = "Chisq")
-# test02<- anova(final_fix,lm_un_ci,test = "Chisq")
-# test03<- anova(final_fix,lm_sx_ci,test = "Chisq")
-# test04<- anova(final_fix,lm_clase_ci,test = "Chisq")
-# test05<- anova(final_fix,ml_plp_std,test = "Chisq")
-# test06<- anova(final_fix,ml_den_std,test = "Chisq")
-# test07<- anova(final_fix,ml_lri_std,test = "Chisq")
-# test08<- anova(final_fix,ml_tot_std,test = "Chisq")
-# test09<- anova(final_fix,ml_plplri_std,test = "Chisq")
-# test10<- anova(final_fix,ml_plpden_std,test = "Chisq")
-# test11<- anova(final_fix,ml_lriden_std,test = "Chisq")
-# test12<- anova(final_fix,final_rand,test = "Chisq")
-# test13<- anova(final_fix,final_norand,test = "Chisq")
-# 
-# lrt01<- rbind(test01,test02,test03,
-#               test04, test05, test06,
-#               test07, test08, test09,
-#               test10, test11, test12,
-#               test13) %>% unique()
-# row.names(lrt01) <- c("Modelo 1",
-#                       "Modelo 2",
-#                       "Modelo 3",
-#                       "Modelo 4",
-#                       "Modelo 5", 
-#                       "Modelo 6",
-#                       "Modelo 7",
-#                       "Modelo 8",
-#                       "Modelo 9",
-#                       "Modelo 10",
-#                       "Modelo 11",
-#                       "Modelo 13",
-#                       "Modelo 14")
-# knitr::kable(lrt01,digits = 3, caption = "Test de devianza entre modelos")
-# 
-# 
-
-
 
 # Comparativa pendientes e interceptos ------------------------------------
 
@@ -279,10 +240,10 @@ x %>%
   select(1, 2, ipo) %>% 
   mutate_at(vars(2, 3), ~(round(., 3))) %>% 
   rowwise() %>% 
-  mutate(pred = round(b0..Intercept. + (ipo*.53), 3)) %>% 
+  mutate(pred = round(b0..Intercept. + (ipo*-.53), 3)) %>% 
   ungroup() %>% 
   .[order(.$pred, decreasing = T),] %>%  
-  kable(caption = "Interceptos aleatorios estimados en el 
+  kable(caption = "Interceptos aleatorios y valores predichos estimados en el 
 Modelo 12",
         format = "html",
         col.names = c("País",
@@ -298,15 +259,58 @@ x %>%
   select(1, 2, ipo) %>% 
   mutate_at(vars(2, 3), ~(round(., 3))) %>% 
   rowwise() %>% 
-  mutate(pred = round(b0..Intercept. + (ipo*.53), 3)) %>% 
+  mutate(pred = round(b0..Intercept. + (ipo*-.53), 3)) %>% 
   ungroup() %>% 
   ggplot(aes(x = ipo, y = pred)) +
   geom_point() + 
   geom_text_repel(aes(label=pais)) +
   geom_smooth(method = "lm", colour = "black") + 
-  labs(title="Relación entre el IPO y los valores predichos para un obrero
-hombre no sindicalizado",
+  labs(title = "Gráfico 2",
+  subtitle="Relación entre el IPO y los valores predichos para un obrero hombre no sindicalizado",
        x ="IPO", y = "Valores predichos",
        caption = "Elaboración propia") +
   theme_minimal() 
 save_plot("output/fig/cor_predipo.jpg", fig = last_plot(), width = 19, height = 14)
+
+
+# Valores predichos por clase para Chile ----------------------------------
+
+p = data.frame(clases = factor(c("Proletario",
+           "Obrero calificado",
+           "Experto no directivo",
+           "Directivo/supervisor no calificado",
+           "Directivo/supervisor calificado",
+           "Gerente",
+           "Pequeña burguesia no profesional",
+           "Pequeña burguesia profesional",
+           "Capitalista"), levels = c("Proletario",
+                                      "Obrero calificado",
+                                      "Experto no directivo",
+                                      "Directivo/supervisor no calificado",
+                                      "Directivo/supervisor calificado",
+                                      "Gerente",
+                                      "Pequeña burguesia no profesional",
+                                      "Pequeña burguesia profesional",
+                                      "Capitalista")),
+           pred = c(1.95 +(-.71*-.53),
+                    1.95 +(-.71*-.53) -.22,
+                    1.95 +(-.71*-.53) -.61,
+                    1.95 +(-.71*-.53) -.22,
+                    1.95 +(-.71*-.53) -.48,
+                    1.95 +(-.71*-.53) -.69,
+                    1.95 +(-.71*-.53) -.34,
+                    1.95 +(-.71*-.53) -.78,
+                    1.95 +(-.71*-.53) -.76))
+
+p %>% 
+  ggplot(aes(x = clases, y = pred, color = clases)) +
+  geom_point() + 
+  labs(title = "Gráfico 1",
+       subtitle = "Valores predichos para Chile según clase social",
+       y = "", x ="",
+       caption = "Elaboración propia") +
+  guides(color = "none") +
+  scale_color_discrete(name = "Clases sociales") +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) +
+  theme_minimal()
+save_plot("output/fig/predclase.jpg", fig = last_plot(), width = 19, height = 14)

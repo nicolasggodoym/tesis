@@ -28,7 +28,7 @@ plot(lineal$residuos, lineal$pred)
 
 ggplot(lineal, aes(residuos, pred)) +
   geom_point() + 
-  labs(title = "Gráfico 1",
+  labs(title = "Gráfico 3",
        subtitle = "Correlación entre residuos y valores predichos",
        caption = "Elaboración propia") +
   xlab("Residuos") + ylab("Valores predichos") +
@@ -39,7 +39,7 @@ sjPlot::save_plot("output/fig/linealidad.png", fig = last_plot())
 
 ggplot(lineal, aes(x = ipo,y =obs)) +
   geom_point() + 
-  labs(title = "Gráfico 2",
+  labs(title = "Gráfico 4",
        subtitle = "Correlación entre dependiente y IPO",
        caption = "Elaboración propia") +
   xlab("IPO") + ylab("Actitud mercantilizada hacia el trabajo") +
@@ -63,7 +63,7 @@ plot(mod)
 ## Normalidad de residuos --------------------------------------------------
 check_normality(mod) #Test Saphiro-Wilk
 qqnorm(lineal$residuos, pch = 1, frame = FALSE,
-       main = "Gráfico 3. 
+       main = "Gráfico 5. 
        Análisis de normalidad de residuos",
        xlab = "Cuantiles teóricos",
        ylab = "Cuantiles observados")
