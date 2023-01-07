@@ -117,7 +117,7 @@ webshot("output/fig/country_summary_std.html", "output/fig/country_summary_std.p
 # Correlación variables macro ---------------------------------------------
 
 sjPlot::tab_corr(data %>% select(plp_std, den_std, lri_std),
-                 title = "Correlación de Pearson para variables macro",
+                 title = "Correlacion de Pearson para variables macro",
                  corr.method = "pearson",
                  triangle = "lower",
                  file = "output/fig/country_corr.html") 

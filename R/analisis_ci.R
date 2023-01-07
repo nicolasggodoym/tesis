@@ -51,7 +51,7 @@ final_fix = lmer(job_money ~ clase + UNION + SEX +ipo+(1|country), data)
 final_rand = lmer(job_money ~ clase + UNION + SEX +(ipo|country), data)
 final_norand = lmer(job_money ~ clase + UNION + SEX +(1|country), data)
 
-lm# Un nivel -----------------------------------------------
+# Un nivel -----------------------------------------------
 
 tab_model(list(lm_sim_ci, lm_un_ci, lm_sx_ci, lm_clase_ci),
           title = "Regresion lineal sobre actitud mercantilizada hacia el trabajo",  
@@ -292,25 +292,50 @@ p = data.frame(clases = factor(c("Proletario",
                                       "Pequeña burguesia no profesional",
                                       "Pequeña burguesia profesional",
                                       "Capitalista")),
-           pred = c(1.95 +(-.71*-.53),
-                    1.95 +(-.71*-.53) -.22,
-                    1.95 +(-.71*-.53) -.61,
-                    1.95 +(-.71*-.53) -.22,
-                    1.95 +(-.71*-.53) -.48,
-                    1.95 +(-.71*-.53) -.69,
-                    1.95 +(-.71*-.53) -.34,
-                    1.95 +(-.71*-.53) -.78,
-                    1.95 +(-.71*-.53) -.76))
+           pais = c("Chile", "Chile", "Chile", "Chile", "Chile", "Chile", "Chile", 
+                    "Chile", "Chile",
+                    "Finlandia", "Finlandia", "Finlandia" ,"Finlandia" ,"Finlandia",
+                    "Finlandia", "Finlandia", "Finlandia", "Finlandia"),
+           pred = c(round(1.95 + (-.71*-.53)),
+                    round(1.95 + (-.71*-.53) -.22, 3),
+                    round(1.95 + (-.71*-.53) -.61, 3),
+                    round(1.95 + (-.71*-.53) -.22, 3),
+                    round(1.95 + (-.71*-.53) -.48, 3),
+                    round(1.95 + (-.71*-.53) -.69, 3),
+                    round(1.95 + (-.71*-.53) -.34, 3),
+                    round(1.95 + (-.71*-.53) -.78, 3),
+                    round(1.95 + (-.71*-.53) -.76, 3),
+                    round(2.6 + -.53),
+                    round(2.6 + -.53 -.22, 3),
+                    round(2.6 + -.53 -.61, 3),
+                    round(2.6 + -.53 -.22, 3),
+                    round(2.6 + -.53 -.48, 3),
+                    round(2.6 + -.53 -.69, 3),
+                    round(2.6 + -.53 -.34, 3),
+                    round(2.6 + -.53 -.78, 3),
+                    round(2.6 + -.53 -.76, 3)))
+           
+p = p %>%
+  rowwise() %>% 
+  mutate(inf = pred - ((var(.$pred)/sqrt(10))*1.96),
+         sup = pred + ((var(.$pred)/sqrt(10))*1.96)) %>%
+  ungroup()
+  
 
 p %>% 
-  ggplot(aes(x = clases, y = pred, color = clases)) +
+  ggplot(aes(x = clases, y = pred), 
+             label = pred) +
   geom_point() + 
+  geom_errorbar(aes(ymin = inf, ymax = sup, width = 0.2)) +
+  geom_text(aes(label = pred), hjust =1.3) +
   labs(title = "Gráfico 1",
-       subtitle = "Valores predichos para Chile según clase social",
+       subtitle = "Valores predichos para Chile y Finlandia según clase social",
        y = "", x ="",
        caption = "Elaboración propia") +
   guides(color = "none") +
   scale_color_discrete(name = "Clases sociales") +
   scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) +
-  theme_minimal()
-save_plot("output/fig/predclase.jpg", fig = last_plot(), width = 19, height = 14)
+  theme_minimal() +
+  facet_grid(cols = vars(pais))
+
+save_plot("output/fig/predclase.jpg", fig = last_plot(), width = 35, height = 25)

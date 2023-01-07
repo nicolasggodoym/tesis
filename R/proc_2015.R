@@ -195,10 +195,10 @@ data <- issp %>%
                                     NEMPLOY %in% c("3 a 49 empleados", "Más de 50 empleados") ~ 'Capitalista',
                                   propiedad == 'Propietario' & 
                                     NEMPLOY == "1 o 2 empleados" & 
-                                    habilidades == 'Experto' ~ 'Pequeña burguesia profesional',
+                                    habilidades == 'Experto' ~ 'Pequena burguesia profesional',
                                   propiedad == 'Propietario' & 
                                     NEMPLOY == "1 o 2 empleados" & 
-                                    habilidades != 'Experto' ~ 'Pequeña burguesia no profesional',
+                                    habilidades != 'Experto' ~ 'Pequena burguesia no profesional',
                                   propiedad == 'No propietario' & WRKSUP == 1 & habilidades == 'Experto' ~ 'Gerente',
                                   propiedad == 'No propietario' & WRKSUP == 1 & habilidades == 'Calificado' ~ 'Directivo/supervisor calificado',
                                   propiedad == 'No propietario' & WRKSUP == 1 & habilidades == 'No calificado' ~ 'Directivo/supervisor no calificado',
@@ -212,8 +212,8 @@ data <- issp %>%
                                    'Directivo/supervisor no calificado',
                                    'Directivo/supervisor calificado', 
                                    'Gerente',
-                                   'Pequeña burguesia no profesional',
-                                   'Pequeña burguesia profesional',
+                                   'Pequena burguesia no profesional',
+                                   'Pequena burguesia profesional',
                                    'Capitalista'))) 
 
 data <- data %>%
