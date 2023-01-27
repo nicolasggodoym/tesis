@@ -263,14 +263,32 @@ x %>%
   ungroup() %>% 
   ggplot(aes(x = ipo, y = pred)) +
   geom_point() + 
-  geom_text_repel(aes(label=pais)) +
+  geom_text_repel(aes(label=pais), max.overlaps = 25) +
   geom_smooth(method = "lm", colour = "black") + 
   labs(title = "Gráfico 2",
   subtitle="Relación entre el IPO y los valores predichos para un obrero hombre no sindicalizado",
        x ="IPO", y = "Valores predichos",
        caption = "Elaboración propia") +
   theme_minimal() 
-save_plot("output/fig/cor_predipo.jpg", fig = last_plot(), width = 19, height = 14)
+ggsave("output/fig/cor_predipo.jpg", fig = last_plot(), width = 19, height = 14)
+
+x %>% 
+  select(1, 2, ipo) %>% 
+  mutate_at(vars(2, 3), ~(round(., 3))) %>% 
+  rowwise() %>% 
+  mutate(pred = round(b0..Intercept. + (ipo*-.53), 3)) %>% 
+  ungroup() %>% 
+  ggplot(aes(x = ipo, y = pred)) +
+  geom_point() + 
+  geom_text_repel(aes(label=pais), max.overlaps = 25) +
+  geom_smooth(method = "lm", colour = "black") + 
+  labs(title = "Relación entre el IPO y los valores predichos para un obrero hombre no sindicalizado",
+       subtitle="",
+       x ="IPO", y = "Valores predichos",
+       caption = "Elaboración propia") +
+  theme_minimal() 
+
+ggsave("output/fig/cor_predipo_notitulo.jpg", fig = last_plot())
 
 
 # Valores predichos por clase para Chile ----------------------------------
@@ -339,3 +357,21 @@ p %>%
   facet_grid(cols = vars(pais))
 
 save_plot("output/fig/predclase.jpg", fig = last_plot(), width = 35, height = 25)
+
+p %>% 
+  ggplot(aes(x = clases, y = pred), 
+         label = pred) +
+  geom_point() + 
+  geom_errorbar(aes(ymin = inf, ymax = sup, width = 0.2)) +
+  geom_text(aes(label = pred), hjust =1.3) +
+  labs(title = "Valores predichos para Chile y Finlandia según clase social",
+       subtitle = "",
+       y = "", x ="",
+       caption = "Elaboración propia") +
+  guides(color = "none") +
+  scale_color_discrete(name = "Clases sociales") +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) +
+  theme_minimal() +
+  facet_grid(cols = vars(pais))
+
+save_plot("output/fig/predclase_notitulo.jpg", fig = last_plot(), width = 33, height = 15)
